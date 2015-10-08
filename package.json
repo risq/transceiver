@@ -61,5 +61,8 @@
       "spy",
       "expect"
     ]
+  },
+  "dependencies": {
+    "event-emitter": "^0.3.4"
   }
 }
