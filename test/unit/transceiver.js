@@ -42,7 +42,7 @@ describe('channel', () => {
   });
   const message = 'message';
 
-  describe('Event emitter', () => {
+  describe('event emitter', () => {
     beforeEach(() => {
       spy(channel, 'on');
       spy(channel, 'off');
@@ -77,7 +77,7 @@ describe('channel', () => {
     });
   });
 
-  describe('Request/Reply', () => {
+  describe('request/reply', () => {
     beforeEach(() => {
       spy(channel, 'request');
       spy(channel, 'reply');
@@ -168,17 +168,28 @@ describe('channel', () => {
     });
   });
 
-  describe('Reset', () => {
+  describe('reset', () => {
     beforeEach(() => {
       spy(channel, 'reset');
+      cb.reset();
+
+      channel.on(message, cb);
+      channel.reply('message', cb);
       channel.reset();
     });
 
-    describe('on', () => {
-      it('should have been run once', () => {
-        expect(channel.reset).to.have.been.calledOnce;
-      });
+    it('should have been run once', () => {
+      expect(channel.reset).to.have.been.calledOnce;
+    });
+
+    it('should have prevent on() callback to be called on emit()', () => {
+      channel.emit(message);
+      expect(cb).to.have.not.been.called;
+    });
+
+    it('should have prevent reply() callback to be called on request()', () => {
+      channel.emit(message);
+      expect(cb).to.have.not.been.called;
     });
   });
-
 });
