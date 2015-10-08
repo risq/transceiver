@@ -1,25 +1,25 @@
-import radio from '../../src/radio';
+import transceiver from '../../src/transceiver';
 import Channel from '../../src/channel';
 
-describe('radio', () => {
+describe('transceiver', () => {
   describe('channel getter', () => {
     beforeEach(() => {
-      spy(radio, 'channel');
-      radio.channel('test');
+      spy(transceiver, 'channel');
+      transceiver.channel('test');
     });
 
     it('should have been run once', () => {
-      expect(radio.channel).to.have.been.calledOnce;
+      expect(transceiver.channel).to.have.been.calledOnce;
     });
 
     it('should have returned a channel instance', () => {
-      expect(radio.channel).to.have.returned(sinon.match.instanceOf(Channel));
+      expect(transceiver.channel).to.have.returned(sinon.match.instanceOf(Channel));
     });
   });
 });
 
 describe('channel', () => {
-  const channel = radio.channel('test');
+  const channel = transceiver.channel('test');
   const data = {
     hello: 'world'
   };

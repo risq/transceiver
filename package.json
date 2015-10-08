@@ -1,8 +1,8 @@
 {
-  "name": "radio",
+  "name": "transceiver",
   "version": "0.0.1",
-  "description": "Request/reply event pattern",
-  "main": "dist/radio.js",
+  "description": "Javascript request/reply event pattern",
+  "main": "dist/transceiver.js",
   "scripts": {
     "test": "gulp",
     "test-browser": "gulp test-browser",
@@ -11,15 +11,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/risq/radio.git"
+    "url": "https://github.com/risq/transceiver.git"
   },
   "keywords": [],
   "author": "risq <valentin.ledrapier@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/risq/radio/issues"
+    "url": "https://github.com/risq/transceiver/issues"
   },
-  "homepage": "https://github.com/risq/radio",
+  "homepage": "https://github.com/risq/transceiver",
   "devDependencies": {
     "babel-core": "^5.2.17",
     "babel-eslint": "^4.0.5",
@@ -54,8 +54,8 @@
     "watchify": "^3.3.1"
   },
   "babelBoilerplateOptions": {
-    "entryFileName": "radio",
-    "mainVarName": "radio",
+    "entryFileName": "transceiver",
+    "mainVarName": "transceiver",
     "mochaGlobals": [
       "stub",
       "spy",

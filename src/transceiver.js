@@ -1,6 +1,6 @@
 import Channel from './channel';
 
-export default new class Radio {
+export default new class Transceiver {
   constructor() {
     this.channels = {};
   }

@@ -3,7 +3,7 @@ var _createClass = (function () { function defineProperties(target, props) { for
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
 (function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('event-emitter')) : typeof define === 'function' && define.amd ? define(['event-emitter'], factory) : global.radio = factory(global.EventEmitter);
+  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('event-emitter')) : typeof define === 'function' && define.amd ? define(['event-emitter'], factory) : global.transceiver = factory(global.EventEmitter);
 })(this, function (EventEmitter) {
   'use strict';
 
@@ -64,14 +64,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
   ;
 
-  var radio = new ((function () {
-    function Radio() {
-      _classCallCheck(this, Radio);
+  var transceiver = new ((function () {
+    function Transceiver() {
+      _classCallCheck(this, Transceiver);
 
       this.channels = {};
     }
 
-    _createClass(Radio, [{
+    _createClass(Transceiver, [{
       key: 'channel',
       value: function channel(name) {
         if (!name || typeof name !== 'string') {
@@ -81,9 +81,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       }
     }]);
 
-    return Radio;
+    return Transceiver;
   })())();
 
-  return radio;
+  return transceiver;
 });
-//# sourceMappingURL=radio.js.map
+//# sourceMappingURL=transceiver.js.map
