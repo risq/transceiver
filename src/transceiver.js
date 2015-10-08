@@ -1,7 +1,11 @@
+import debug from 'debug';
 import Channel from './channel';
+
+const dbg = debug('transceiver:main');
 
 export default new class Transceiver {
   constructor() {
+    dbg('Initializing transceiver');
     this.channels = {};
   }
 

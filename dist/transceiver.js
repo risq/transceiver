@@ -3,24 +3,28 @@ var _createClass = (function () { function defineProperties(target, props) { for
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
 (function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('event-emitter')) : typeof define === 'function' && define.amd ? define(['event-emitter'], factory) : global.transceiver = factory(global.EventEmitter);
-})(this, function (EventEmitter) {
+  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('debug'), require('event-emitter')) : typeof define === 'function' && define.amd ? define(['debug', 'event-emitter'], factory) : global.transceiver = factory(global.debug, global.EventEmitter);
+})(this, function (debug, EventEmitter) {
   'use strict';
+
+  var channel__dbg = debug('transceiver:channel');
 
   var Channel = (function () {
     function Channel(name) {
       _classCallCheck(this, Channel);
 
+      channel__dbg('Initializing channel ' + name);
       this._name = name;
       this._requests = {};
       this._emitter = new EventEmitter();
+      this._dbg = debug('transceiver:channel:' + name);
     }
 
     _createClass(Channel, [{
       key: 'request',
       value: function request(message) {
         if (this._requests[message]) {
-          console.log('context', this._requests[message].context);
+          this._dbg('Calling \'' + message + '\' request handler');
 
           for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
             args[_key - 1] = arguments[_key];
@@ -28,14 +32,15 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
           return this._requests[message].callback.apply(this._requests[message].context, args);
         } else {
-          console.log('Request \'' + message + '\' has no handler');
+          this._dbg('Request \'' + message + '\' has no handler');
         }
       }
     }, {
       key: 'reply',
       value: function reply(message, callback, context) {
+        this._dbg('Creating new handler for request \'' + message + '\'');
         if (this._requests[message]) {
-          console.log('Request \'' + message + '\' handler will be overwritten');
+          this._dbg('Request \'' + message + '\' handler will be overwritten');
         }
         this._requests[message] = {
           callback: callback,
@@ -64,10 +69,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
   ;
 
+  var transceiver__dbg = debug('transceiver:main');
+
   var transceiver = new ((function () {
     function Transceiver() {
       _classCallCheck(this, Transceiver);
 
+      transceiver__dbg('Initializing transceiver');
       this.channels = {};
     }
 
