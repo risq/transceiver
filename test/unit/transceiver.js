@@ -16,6 +16,20 @@ describe('transceiver', () => {
       expect(transceiver.channel).to.have.returned(sinon.match.instanceOf(Channel));
     });
   });
+
+  describe('invalid channel getter', () => {
+    it('should have thrown an error if channel name is missing', () => {
+      expect(() => {
+        transceiver.channel();
+      }).to.always.throw(Error);
+    });
+
+    it('should have thrown an error if channel name is not a string', () => {
+      expect(() => {
+        transceiver.channel(4);
+      }).to.always.throw(Error);
+    });
+  });
 });
 
 describe('channel', () => {
@@ -85,6 +99,22 @@ describe('channel', () => {
       });
     });
 
+    describe('unhandled request', () => {
+      beforeEach(() => {
+        cb.reset();
+        channel.reply('message', cb);
+        channel.request('unhandled');
+      });
+
+      it('should have been run once', () => {
+        expect(channel.request).to.have.been.calledOnce;
+      });
+
+      it('should have returned an undefined value', () => {
+        expect(channel.request).to.have.always.returned(undefined);
+      });
+    });
+
     describe('reply', () => {
       beforeEach(() => {
         cb.reset();
@@ -132,7 +162,7 @@ describe('channel', () => {
         expect(channel.reply).to.have.been.calledOnce;
       });
 
-      it('should always call handler with given arguments', () => {
+      it('should call handler with given arguments', () => {
         expect(cb).to.have.always.been.calledWithExactly(data, 'value');
       });
     });
