@@ -167,4 +167,18 @@ describe('channel', () => {
       });
     });
   });
+
+  describe('Reset', () => {
+    beforeEach(() => {
+      spy(channel, 'reset');
+      channel.reset();
+    });
+
+    describe('on', () => {
+      it('should have been run once', () => {
+        expect(channel.reset).to.have.been.calledOnce;
+      });
+    });
+  });
+
 });

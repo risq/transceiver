@@ -1,46 +1,53 @@
 import debug from 'debug';
 import EventEmitter from 'event-emitter';
+import allOff from 'event-emitter/all-off';
 
 const dbg = debug('transceiver:channel');
 
 export default class Channel {
   constructor(name) {
     dbg(`Initializing channel ${name}`);
-    this._name = name;
-    this._requests = {};
-    this._emitter = new EventEmitter();
-    this._dbg = debug(`transceiver:channel:${name}`);
+    this.name = name;
+    this.requestHandlers = {};
+    this.emitter = new EventEmitter();
+    this.dbg = debug(`transceiver:channel:${name}`);
   }
 
   request(message, ...args) {
-    if (this._requests[message]) {
-      this._dbg(`Calling '${message}' request handler`);
-      return this._requests[message].callback.apply(this._requests[message].context, args);
+    if (this.requestHandlers[message]) {
+      this.dbg(`Calling '${message}' request handler`);
+      return this.requestHandlers[message].callback.apply(this.requestHandlers[message].context, args);
     } else {
-      this._dbg(`Request '${message}' has no handler`);
+      this.dbg(`Request '${message}' has no handler`);
     }
   }
 
   reply(message, callback, context) {
-    this._dbg(`Creating new handler for request '${message}'`);
-    if (this._requests[message]) {
-      this._dbg(`Request '${message}' handler will be overwritten`);
+    this.dbg(`Creating new handler for request '${message}'`);
+    if (this.requestHandlers[message]) {
+      this.dbg(`Request '${message}' handler will be overwritten`);
     }
-    this._requests[message] = {
+    this.requestHandlers[message] = {
       callback,
       context: context || this
     };
   }
 
   on() {
-    this._emitter.on.apply(this._emitter, arguments);
+    this.emitter.on.apply(this.emitter, arguments);
   }
 
   emit() {
-    this._emitter.emit.apply(this._emitter, arguments);
+    this.emitter.emit.apply(this.emitter, arguments);
   }
 
   off() {
-    this._emitter.off.apply(this._emitter, arguments);
+    this.emitter.off.apply(this.emitter, arguments);
+  }
+
+  reset() {
+    this.dbg(`Resetting channel`);
+    this.requestHandlers = {};
+    allOff(this.emitter);
   }
 };
