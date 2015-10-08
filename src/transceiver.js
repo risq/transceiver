@@ -6,13 +6,16 @@ const dbg = debug('transceiver:main');
 export default new class Transceiver {
   constructor() {
     dbg('Initializing transceiver');
-    this.channels = {};
+    this._channels = {};
   }
 
   channel(name) {
     if (!name || typeof(name) !== 'string') {
       throw new Error('Invalid or missing channel name');
     }
-    return this.channels[name] || new Channel(name);
+    if (!this._channels[name]) {
+      this._channels[name] = new Channel(name);
+    }
+    return this._channels[name];
   }
 };
