@@ -1,7 +1,7 @@
 {
   "name": "transceiver",
   "version": "0.0.1",
-  "description": "Javascript request/reply event pattern",
+  "description": "Channel based event engine with request/reply pattern for node & browser",
   "main": "dist/transceiver.js",
   "scripts": {
     "test": "gulp",
@@ -13,7 +13,7 @@
     "type": "git",
     "url": "https://github.com/risq/transceiver.git"
   },
-  "keywords": [],
+  "keywords": ["events", "request", "reply", "node", "browser", "event", "emitter", "channel", "radio", "emit", "on"],
   "author": "risq <valentin.ledrapier@gmail.com>",
   "license": "MIT",
   "bugs": {
