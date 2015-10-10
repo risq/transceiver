@@ -1,6 +1,6 @@
 # transceiver
 
-Javascript request/reply event pattern
+Channel based event engine with request/reply pattern for node & browser
 
 [![Travis build status](http://img.shields.io/travis/risq/transceiver.svg?style=flat)](https://travis-ci.org/risq/transceiver)
 [![Code Climate](https://codeclimate.com/github/risq/transceiver/badges/gpa.svg)](https://codeclimate.com/github/risq/transceiver)
