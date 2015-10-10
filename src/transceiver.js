@@ -18,4 +18,12 @@ export default new class Transceiver {
     }
     return this.channels[name];
   }
+
+  request(channelName, ...args) {
+    return this.channel(channelName).request(...args);
+  }
+
+  reply(channelName, ...args) {
+    return this.channel(channelName).reply(...args);
+  }
 };
