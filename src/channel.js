@@ -13,17 +13,31 @@ export default class Channel {
     this.dbg = debug(`transceiver:channel:${name}`);
   }
 
-  request(message, ...args) {
-    if (this.requestHandlers[message]) {
-      this.dbg(`Calling '${message}' request handler`);
-      return this.requestHandlers[message].callback.apply(this.requestHandlers[message].context, args);
+  request() {
+    if (arguments[0] && Array.isArray(arguments[0])) {
+      return this.callMultipleHandlers(...arguments);
+    } else if (arguments[0] && typeof(arguments[0]) === 'string') {
+      return this.callHandler(...arguments);
     } else {
-      this.dbg(`Request '${message}' has no handler`);
+      throw new Error('Invalid message name');
     }
   }
 
-  reply(message, callback, context) {
-    this.dbg(`Creating new handler for request '${message}'`);
+  reply() {
+    if (arguments[0] && typeof(arguments[0]) === 'object') {
+      this.createMultipleHandlers(...arguments);
+    } else if (arguments[0] && typeof(arguments[0]) === 'string') {
+      this.createHandler(...arguments);
+    } else {
+      throw new Error('Invalid message name');
+    }
+  }
+
+  createHandler(message, callback, context) {
+    this.dbg(`Defining new handler for request '${message}'`);
+    if (!callback || typeof(callback) !== 'function') {
+      throw new Error('Invalid or missing callback');
+    }
     if (this.requestHandlers[message]) {
       this.dbg(`Request '${message}' handler will be overwritten`);
     }
@@ -31,6 +45,32 @@ export default class Channel {
       callback,
       context: context || this
     };
+  }
+
+  createMultipleHandlers(handlers, context) {
+    for (let key of Object.keys(handlers)) {
+      this.createHandler(key, handlers[key], context);
+    }
+  }
+
+  callHandler(message, ...args) {
+    if (this.requestHandlers[message]) {
+      this.dbg(`Calling '${message}' request handler`);
+      return this.requestHandlers[message].callback.apply(this.requestHandlers[message].context, args);
+    }
+    this.dbg(`Request '${message}' has no handler`);
+  }
+
+  callMultipleHandlers(requests, returnObject) {
+    if (returnObject) {
+      const res = {};
+      requests.forEach((message) => {
+        res[message] = this.callHandler(message);
+      });
+      return res;
+    } else {
+      return requests.map(this.callHandler, this);
+    }
   }
 
   on() {
