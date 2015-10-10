@@ -44,7 +44,7 @@ describe('transceiver', () => {
     });
   });
 
-  describe('.reply(channel, name)', () => {
+  describe('.reply(channel [, args])', () => {
     beforeEach(() => {
       spy(transceiver, 'reply');
     });
@@ -55,7 +55,7 @@ describe('transceiver', () => {
     });
   });
 
-  describe('.request(channel, name)', () => {
+  describe('.request(channel [, args])', () => {
     beforeEach(() => {
       spy(transceiver, 'request');
       transceiver.request('test', name);
