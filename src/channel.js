@@ -31,6 +31,7 @@ export default class Channel {
     } else {
       throw new Error('Invalid message name');
     }
+    return this;
   }
 
   createHandler(message, callback, context) {
@@ -75,19 +76,23 @@ export default class Channel {
 
   on() {
     this.emitter.on.apply(this.emitter, arguments);
+    return this;
   }
 
   emit() {
     this.emitter.emit.apply(this.emitter, arguments);
+    return this;
   }
 
   off() {
     this.emitter.off.apply(this.emitter, arguments);
+    return this;
   }
 
   reset() {
     this.dbg(`Resetting channel`);
     this.requestHandlers = {};
     allOff(this.emitter);
+    return this;
   }
 };
