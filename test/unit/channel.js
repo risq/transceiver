@@ -100,7 +100,7 @@ describe('channel', () => {
     });
   });
 
-  describe('.request(Object requests [, returnObject])', () => {
+  describe('.request(Array requests [, returnObject])', () => {
     beforeEach(() => {
       spy(channel, 'request');
     });
