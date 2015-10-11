@@ -245,7 +245,7 @@ describe('channel', () => {
 
     it('should have thrown an error if requests list is not an array or an object', () => {
       expect(() => {
-        channel.requestObject('req1');
+        channel.requestProps('req1');
       }).to.always.throw(Error);
     });
   });
