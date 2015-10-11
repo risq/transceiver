@@ -8,6 +8,9 @@ Channel based event engine with request/reply pattern for node & browser
 [![Dependency Status](https://david-dm.org/risq/transceiver.svg)](https://david-dm.org/risq/transceiver)
 [![devDependency Status](https://david-dm.org/risq/transceiver/dev-status.svg)](https://david-dm.org/risq/transceiver#info=devDependencies)
 
+
+## Example usage
+
 ```js
 // app.js
 
@@ -43,6 +46,7 @@ transceiver.channel('auth')
   .emit('login', this.userId);
 ```
 
+
 ## API Reference
 
 ### transceiver
@@ -69,7 +73,8 @@ Shorthand for `transceiver.channel(name).request(args...)`.
 
 ##### `.reply(String name, Function handler [, Object context])`
 
-Defines a new request handler for the channel. If a handler is already defined for the given request name, it will be overwritten.
+Defines a new request handler for the channel. If a handler is already defined for the
+given request name, it will be overwritten.
 
 ```js
 transceiver.channel('users')
@@ -98,16 +103,12 @@ transceiver.channel('users')
 
 ##### `.request(String name [, args])`
 
-Send a request to the channel. If defined, call the request handler with given arguments and return its result.
+Send a request to the channel. If defined, call the request handler with given arguments
+and return its result.
 
 ```js
-const userId = 4;
-
-transceiver.channel('users')
-  .request('getUsername', userId)
-  .then((username) => {
-    console.log(username);
-  });
+const username = transceiver.channel('users')
+  .request('getUsername', userId);
 ```
 
 
@@ -124,7 +125,8 @@ Shorthand for `.requestProps(Object requests)`.
 
 ##### `.requestArray(Array requests|Object requests)`
 
-Sends several requests in the same time, and returns handlers results as an array. Arguments can be passed for each request by using an object of request.
+Sends several requests in the same time, and returns handlers results as an array.
+Arguments can be passed for each request by using an object of request.
 
 ```js
 // Using an array of requests
@@ -154,7 +156,9 @@ Promise.all(assetsPromises)
 
 ##### `.requestProps(Array requests|Object requests)`
 
-Sends several requests in the same time, and returns an object where keys correspond to requests names and values to handlers results. Arguments can be passed for each request by using an object of request.
+Sends several requests in the same time, and returns an object where keys correspond to
+requests names and values to handlers results. Arguments can be passed for each request
+by using an object of request.
 
 ```js
 // Using an array of requests
@@ -171,7 +175,8 @@ const result = transceiver.channel('loader')
     getCategories: [],
   });
 
-// In both case, requestProps will return an object where keys correspond to requests names and values to handlers results
+// In both case, requestProps will return an object where keys correspond to
+// requests names and values to handlers results
 result.getArticles.forEach((article) => {
   console.log(article);
 });
