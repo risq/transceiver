@@ -64,45 +64,83 @@ describe('channel', () => {
     });
   });
 
-  describe('.request(name [, args])', () => {
-    beforeEach(() => {
-      spy(channel, 'request');
+  describe('.request()', () => {
+    describe('.request(name [, args])', () => {
+      beforeEach(() => {
+        spy(channel, 'request');
+      });
+
+      it('should have been run once', () => {
+        channel.reply(name, cb);
+        channel.request(name);
+        expect(channel.request).to.have.been.calledOnce;
+      });
+
+      it('should have returned handler callback return value', () => {
+        channel.reply(name, cb);
+        channel.request(name);
+        expect(channel.request).to.have.always.returned(data);
+      });
+
+      it('should have returned an undefined value if request is not handled', () => {
+        channel.reply(name, cb);
+        channel.request('anotherMessage');
+        expect(channel.request).to.have.always.returned(undefined);
+      });
+
+      it('should have called handler with given arguments', () => {
+        channel.reply(name, cb);
+        channel.request(name, data, 'value');
+        expect(cb).to.have.always.been.calledWithExactly(data, 'value');
+      });
+
+      it('should have thrown an error if name is missing', () => {
+        expect(() => {
+          channel.request();
+        }).to.always.throw(Error);
+      });
+
+      it('should have thrown an error if name is invalid', () => {
+        expect(() => {
+          channel.request(42);
+        }).to.always.throw(Error);
+      });
     });
 
-    it('should have been run once', () => {
-      channel.reply(name, cb);
-      channel.request(name);
-      expect(channel.request).to.have.been.calledOnce;
+    describe('.request(Array requests)', () => {
+      beforeEach(() => {
+        spy(channel, 'requestArray');
+      });
+
+      it('should have called requestArray() with given arguments', () => {
+        channel.request(['req1', 'req2', 'req3']);
+        expect(channel.requestArray).to.have.been.calledWith(['req1', 'req2', 'req3']);
+      });
     });
 
-    it('should have returned handler callback return value', () => {
-      channel.reply(name, cb);
-      channel.request(name);
-      expect(channel.request).to.have.always.returned(data);
-    });
+    describe('.request(Object requests)', () => {
+      beforeEach(() => {
+        spy(channel, 'requestProps');
+      });
 
-    it('should have returned an undefined value if request is not handled', () => {
-      channel.reply(name, cb);
-      channel.request('anotherMessage');
-      expect(channel.request).to.have.always.returned(undefined);
-    });
-
-    it('should have thrown an error if name is missing', () => {
-      expect(() => {
-        channel.request();
-      }).to.always.throw(Error);
-    });
-
-    it('should have thrown an error if name is invalid', () => {
-      expect(() => {
-        channel.request(42);
-      }).to.always.throw(Error);
+      it('should have called requestProps() with given arguments', () => {
+        channel.request({
+            req1: [],
+            req2: [data],
+            req3: [data, 'value'],
+        });
+        expect(channel.requestProps).to.have.been.calledWith({
+            req1: [],
+            req2: [data],
+            req3: [data, 'value'],
+        });
+      });
     });
   });
 
-  describe('.request(Array requests [, returnObject])', () => {
+  describe('.requestArray()', () => {
     beforeEach(() => {
-      spy(channel, 'request');
+      spy(channel, 'requestArray');
     });
 
     it('should have handled multiple requests given as an array', () => {
@@ -115,11 +153,11 @@ describe('channel', () => {
       channel.reply('req3', () => {
         return 'req3 result';
       });
-      channel.request(['req1', 'req2', 'req3']);
-      expect(channel.request).to.have.returned(['req1 result', 'req2 result', 'req3 result']);
+      channel.requestArray(['req1', 'req2', 'req3']);
+      expect(channel.requestArray).to.have.returned(['req1 result', 'req2 result', 'req3 result']);
     });
 
-    it('should have returned result as an object if returnObject option is set to true', () => {
+    it('should have handled multiple requests given as an object', () => {
       channel.reply('req1', () => {
         return 'req1 result';
       });
@@ -129,12 +167,86 @@ describe('channel', () => {
       channel.reply('req3', () => {
         return 'req3 result';
       });
-      channel.request(['req1', 'req2', 'req3'], true);
-      expect(channel.request).to.have.returned({
+      channel.requestArray({
+          req1: [],
+          req2: [data],
+          req3: [data, 'value'],
+      });
+      expect(channel.requestArray).to.have.returned(['req1 result', 'req2 result', 'req3 result']);
+    });
+
+    it('should have called request handlers with given arguments', () => {
+      channel.reply('req1', cb);
+      channel.requestArray({
+          req1: [data, 'value'],
+      });
+      expect(cb).to.have.always.been.calledWithExactly(data, 'value');
+    });
+
+    it('should have thrown an error if requests list is not an array or an object', () => {
+      expect(() => {
+        channel.requestArray('req1');
+      }).to.always.throw(Error);
+    });
+  });
+
+  describe('.requestProps()', () => {
+    beforeEach(() => {
+      spy(channel, 'requestProps');
+    });
+
+    it('should have handled multiple requests given as an array', () => {
+      channel.reply('req1', () => {
+        return 'req1 result';
+      });
+      channel.reply('req2', () => {
+        return 'req2 result';
+      });
+      channel.reply('req3', () => {
+        return 'req3 result';
+      });
+      channel.requestProps(['req1', 'req2', 'req3']);
+      expect(channel.requestProps).to.have.returned({
         req1: 'req1 result',
         req2: 'req2 result',
         req3: 'req3 result'
       });
+    });
+
+    it('should have handled multiple requests given as an object', () => {
+      channel.reply('req1', () => {
+        return 'req1 result';
+      });
+      channel.reply('req2', () => {
+        return 'req2 result';
+      });
+      channel.reply('req3', () => {
+        return 'req3 result';
+      });
+      channel.requestProps({
+          req1: [],
+          req2: [data],
+          req3: [data, 'value'],
+      });
+      expect(channel.requestProps).to.have.returned({
+        req1: 'req1 result',
+        req2: 'req2 result',
+        req3: 'req3 result'
+      });
+    });
+
+    it('should have called request handlers with given arguments', () => {
+      channel.reply('req1', cb);
+      channel.requestProps({
+          req1: [data, 'value'],
+      });
+      expect(cb).to.have.always.been.calledWithExactly(data, 'value');
+    });
+
+    it('should have thrown an error if requests list is not an array or an object', () => {
+      expect(() => {
+        channel.requestObject('req1');
+      }).to.always.throw(Error);
     });
   });
 
@@ -165,12 +277,6 @@ describe('channel', () => {
       channel.reply(name, cb);
       channel.request(name);
       expect(cb).to.have.always.been.calledOn(channel);
-    });
-
-    it('should have called handler with given request arguments', () => {
-      channel.reply(name, cb);
-      channel.request(name, data, 'value');
-      expect(cb).to.have.always.been.calledWithExactly(data, 'value');
     });
 
     it('should have thrown an error if name is missing', () => {

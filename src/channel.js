@@ -13,16 +13,6 @@ export default class Channel {
     this.dbg = debug(`transceiver:channel:${name}`);
   }
 
-  request() {
-    if (arguments[0] && Array.isArray(arguments[0])) {
-      return this.callMultipleHandlers(...arguments);
-    } else if (arguments[0] && typeof(arguments[0]) === 'string') {
-      return this.callHandler(...arguments);
-    } else {
-      throw new Error('Invalid message name');
-    }
-  }
-
   reply() {
     if (arguments[0] && typeof(arguments[0]) === 'object') {
       this.createMultipleHandlers(...arguments);
@@ -54,6 +44,18 @@ export default class Channel {
     }
   }
 
+  request() {
+    if (arguments[0] && Array.isArray(arguments[0])) {
+      return this.requestArray(...arguments);
+    } else if (arguments[0] && typeof(arguments[0]) === 'object') {
+      return this.requestProps(...arguments);
+    } else if (arguments[0] && typeof(arguments[0]) === 'string') {
+      return this.callHandler(...arguments);
+    } else {
+      throw new Error('Invalid message name');
+    }
+  }
+
   callHandler(message, ...args) {
     if (this.requestHandlers[message]) {
       this.dbg(`Calling '${message}' request handler`);
@@ -62,16 +64,34 @@ export default class Channel {
     this.dbg(`Request '${message}' has no handler`);
   }
 
-  callMultipleHandlers(requests, returnObject) {
-    if (returnObject) {
-      const res = {};
+  requestArray(requests) {
+    if (Array.isArray(requests)) {
+      return requests.map(this.callHandler, this);
+    } else if (typeof(requests) === 'object') {
+      const res = [];
+      for (let message of Object.keys(requests)) {
+        res.push(this.callHandler(message, ...requests[message]));
+      }
+      return res;
+    } else {
+      throw new Error('Invalid parameter: requests must be an array or an object of requests');
+    }
+  }
+
+  requestProps(requests) {
+    const res = {};
+    if (Array.isArray(requests)) {
       requests.forEach((message) => {
         res[message] = this.callHandler(message);
       });
-      return res;
+    } else if (typeof(requests) === 'object') {
+      for (let message of Object.keys(requests)) {
+        res[message] = this.callHandler(message, ...requests[message]);
+      }
     } else {
-      return requests.map(this.callHandler, this);
+      throw new Error('Invalid parameter: requests must be an array or an object of requests');
     }
+    return res;
   }
 
   on() {
