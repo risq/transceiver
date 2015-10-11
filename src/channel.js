@@ -2,11 +2,8 @@ import debug from 'debug';
 import EventEmitter from 'event-emitter';
 import allOff from 'event-emitter/all-off';
 
-const dbg = debug('transceiver:channel');
-
 export default class Channel {
   constructor(name) {
-    dbg(`Initializing channel ${name}`);
     this.name = name;
     this.requestHandlers = {};
     this.emitter = new EventEmitter();

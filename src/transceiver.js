@@ -14,6 +14,7 @@ export default new class Transceiver {
       throw new Error('Invalid or missing channel name');
     }
     if (!this.channels[name]) {
+      dbg(`Initializing channel ${name}`);
       this.channels[name] = new Channel(name);
     }
     return this.channels[name];
