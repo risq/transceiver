@@ -72,8 +72,6 @@ Shorthand for `transceiver.channel(name).request(args...)`.
 Defines a new request handler for the channel. If a handler is already defined for the given request name, it will be overwritten.
 
 ```js
-// users.js
-
 transceiver.channel('users')
   .reply('getUsername', (userId) => {
     // Fake promise
@@ -89,8 +87,6 @@ transceiver.channel('users')
 Defines several request handlers in the same time.
 
 ```js
-// users.js
-
 transceiver.channel('users')
   .reply({
     getUser: this.getUser,
@@ -105,8 +101,6 @@ transceiver.channel('users')
 Send a request to the channel. If defined, call the request handler with given arguments and return its result.
 
 ```js
-// app.js
-
 const userId = 4;
 
 transceiver.channel('users')
@@ -117,24 +111,70 @@ transceiver.channel('users')
 ```
 
 
-##### `.request(Array requests [, Boolean returnObject])`
+##### `.request(Array requests)`
 
-Send several requests in the same time. If `returnObject` is set to true, returns an object with requests names as keys and handlers results as values. If not, returns an array of handlers results.
+Shorthand for `.requestArray(Array requests)`.
+
+
+##### `.request(Object requests)`
+
+Shorthand for `.requestProps(Object requests)`.
+
+---
+
+##### `.requestArray(Array requests|Object requests)`
+
+Sends several requests in the same time, and returns handlers results as an array. Arguments can be passed for each request by using an object of request.
 
 ```js
-// app.js
-
+// Using an array of requests
 const assetsPromises = transceiver.channel('loader')
-  .request([
+  .requestArray([
     'loadImages',
     'loadSounds',
     'loadData',
   ]);
 
+// Using an object of requests to pass arguments
+const assetsPromises = transceiver.channel('loader')
+  .requestArray({
+    loadImages: ['any', 'argument'],
+    loadSounds: [],
+    loadData: [true],
+  });
+
+// In both case, requestArray will return an array
 Promise.all(assetsPromises)
   .then(() => {
     console.log('All assets have been loaded !');
   });
+```
+
+---
+
+##### `.requestProps(Array requests|Object requests)`
+
+Sends several requests in the same time, and returns an object where keys correspond to requests names and values to handlers results. Arguments can be passed for each request by using an object of request.
+
+```js
+// Using an array of requests
+const result = transceiver.channel('storage')
+  .requestProps([
+    'getArticles',
+    'getCategories',
+  ]);
+
+// Using an object of requests to pass arguments
+const result = transceiver.channel('loader')
+  .requestProps({
+    getArticles: ['any', 'argument'],
+    getCategories: [],
+  });
+
+// In both case, requestProps will return an object where keys correspond to requests names and values to handlers results
+result.getArticles.forEach((article) => {
+  console.log(article);
+});
 ```
 
 ---
