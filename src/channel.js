@@ -11,9 +11,9 @@ export default class Channel {
   }
 
   reply() {
-    if (arguments[0] && typeof(arguments[0]) === 'object') {
+    if (typeof(arguments[0]) === 'object') {
       this.createMultipleHandlers(...arguments);
-    } else if (arguments[0] && typeof(arguments[0]) === 'string') {
+    } else if (typeof(arguments[0]) === 'string') {
       this.createHandler(...arguments);
     } else {
       throw new Error('Invalid message name');
@@ -23,7 +23,7 @@ export default class Channel {
 
   createHandler(message, callback, context) {
     this.dbg(`Defining new handler for request '${message}'`);
-    if (!callback || typeof(callback) !== 'function') {
+    if (typeof(callback) !== 'function') {
       throw new Error('Invalid or missing callback');
     }
     if (this.requestHandlers[message]) {
@@ -41,12 +41,38 @@ export default class Channel {
     }
   }
 
+  replyPromise() {
+    if (typeof(this.Promise) !== 'function') {
+      throw new Error('No global Promise constructor has been found. Use transceiver.setPromise(Promise) to specify one.');
+    } else if (typeof(arguments[0]) === 'object') {
+      this.createMultiplePromiseHandlers(...arguments);
+    } else if (typeof(arguments[0]) === 'string') {
+      this.createPromiseHandler(...arguments);
+    } else {
+      throw new Error('Invalid message name');
+    }
+    return this;
+  }
+
+  createPromiseHandler(message, callback, context) {
+    if (typeof(callback) !== 'function') {
+      throw new Error('Invalid or missing callback');
+    }
+    this.createHandler(message, () => new this.Promise(callback.bind(context || this)));
+  }
+
+  createMultiplePromiseHandlers(handlers, context) {
+    for (let key of Object.keys(handlers)) {
+      this.createPromiseHandler(key, handlers[key], context);
+    }
+  }
+
   request() {
-    if (arguments[0] && Array.isArray(arguments[0])) {
+    if (Array.isArray(arguments[0])) {
       return this.requestArray(...arguments);
-    } else if (arguments[0] && typeof(arguments[0]) === 'object') {
+    } else if (typeof(arguments[0]) === 'object') {
       return this.requestProps(...arguments);
-    } else if (arguments[0] && typeof(arguments[0]) === 'string') {
+    } else if (typeof(arguments[0]) === 'string') {
       return this.callHandler(...arguments);
     } else {
       throw new Error('Invalid message name');

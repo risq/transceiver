@@ -7,15 +7,17 @@ export default new class Transceiver {
   constructor() {
     dbg('Initializing transceiver');
     this.channels = {};
+    this.Promise = Promise || window && window.Promise ? window.Promise : null;
   }
 
   channel(name) {
-    if (!name || typeof(name) !== 'string') {
+    if (typeof(name) !== 'string') {
       throw new Error('Invalid or missing channel name');
     }
     if (!this.channels[name]) {
       dbg(`Initializing channel ${name}`);
       this.channels[name] = new Channel(name);
+      this.channels[name].Promise = this.Promise;
     }
     return this.channels[name];
   }
@@ -26,5 +28,13 @@ export default new class Transceiver {
 
   reply(channelName, ...args) {
     return this.channel(channelName).reply(...args);
+  }
+
+  setPromise(Promise) {
+    dbg('Setting promise object:', Promise);
+    this.Promise = Promise;
+    for (let channel of Object.keys(this.channels)) {
+      this.channels[channel].Promise = this.Promise;
+    }
   }
 };
