@@ -18,7 +18,7 @@ describe('transceiver', () => {
     cb.reset();
   });
 
-  describe('.channel(name)', () => {
+  describe('.channel(String name)', () => {
     beforeEach(() => {
       spy(transceiver, 'channel');
     });
@@ -46,7 +46,7 @@ describe('transceiver', () => {
     });
   });
 
-  describe('.reply(channel [, args])', () => {
+  describe('.reply(String channel [, args])', () => {
     beforeEach(() => {
       spy(transceiver, 'reply');
     });
@@ -57,7 +57,7 @@ describe('transceiver', () => {
     });
   });
 
-  describe('.request(channel [, args])', () => {
+  describe('.request(String channel [, args])', () => {
     beforeEach(() => {
       spy(transceiver, 'request');
       transceiver.request('test', name);

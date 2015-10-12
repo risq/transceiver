@@ -17,7 +17,7 @@ describe('channel', () => {
     cb.reset();
   });
 
-  describe('.on(event, callback)', () => {
+  describe('.on(String event, Function callback)', () => {
     beforeEach(() => {
       spy(channel, 'on');
     });
@@ -28,7 +28,7 @@ describe('channel', () => {
     });
   });
 
-  describe('.emit(event [, args])', () => {
+  describe('.emit(String event [, args])', () => {
     beforeEach(() => {
       spy(channel, 'emit');
     });
@@ -46,7 +46,7 @@ describe('channel', () => {
     });
   });
 
-  describe('.off(event)', () => {
+  describe('.off(String event)', () => {
     beforeEach(() => {
       spy(channel, 'off');
     });
@@ -67,7 +67,7 @@ describe('channel', () => {
   });
 
   describe('.request()', () => {
-    describe('.request(name [, args])', () => {
+    describe('.request(String name [, args])', () => {
       beforeEach(() => {
         spy(channel, 'request');
       });
@@ -140,7 +140,7 @@ describe('channel', () => {
     });
   });
 
-  describe('.requestArray()', () => {
+  describe('.requestArray(Array requests|Object requests)', () => {
     beforeEach(() => {
       spy(channel, 'requestArray');
     });
@@ -192,7 +192,7 @@ describe('channel', () => {
     });
   });
 
-  describe('.requestProps()', () => {
+  describe('.requestProps(Array requests|Object requests)', () => {
     beforeEach(() => {
       spy(channel, 'requestProps');
     });
@@ -257,7 +257,7 @@ describe('channel', () => {
       spy(channel, 'reply');
     });
 
-    describe('.reply(name, callback [, context])', () => {
+    describe('.reply(String name, Function callback [, Object context])', () => {
 
       it('should have been run once', () => {
         channel.reply(name, cb);
@@ -307,7 +307,7 @@ describe('channel', () => {
       });
     });
 
-    describe('.reply(Object handlers [, context])', () => {
+    describe('.reply(Object handlers [, Object context])', () => {
       it('should have handled multiple handlers definition given as one object', () => {
         channel.reply({
           req1: cb,
@@ -355,7 +355,7 @@ describe('channel', () => {
       transceiver.setPromise(OriginalPromiseConstructor);
     });
 
-    describe('.replyPromise(name, callback [, context])', () => {
+    describe('.replyPromise(String name, Function callback [, Object context])', () => {
       it('should have been run once', () => {
         channel.replyPromise(name, cb);
         expect(channel.replyPromise).to.have.been.calledOnce;
