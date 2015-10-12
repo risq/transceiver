@@ -1,6 +1,8 @@
 import transceiver from '../../src/transceiver';
 import Channel from '../../src/channel';
 
+const OriginalPromiseConstructor = transceiver.Promise;
+const FakePromiseConstructor = () => {};
 const channel = transceiver.channel('test');
 const data = {
   hello: 'world'
@@ -67,6 +69,27 @@ describe('transceiver', () => {
 
     it('should have returned handler callback return value', () => {
       expect(transceiver.request).to.have.always.returned(data);
+    });
+  });
+
+  describe('.setPromise(Promise promise)', () => {
+    beforeEach(() => {
+      spy(transceiver, 'setPromise');
+    });
+
+    afterEach(() => {
+      transceiver.setPromise(OriginalPromiseConstructor);
+    });
+
+    it('should have been run once', () => {
+      transceiver.setPromise(null);
+      expect(transceiver.setPromise).to.have.been.calledOnce;
+    });
+
+    it('should have changed promise constructor of each channel', () => {
+      transceiver.channel(name);
+      transceiver.setPromise(FakePromiseConstructor);
+      expect(transceiver.channel(name).Promise).to.equals(FakePromiseConstructor);
     });
   });
 });
