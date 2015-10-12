@@ -31,7 +31,7 @@ export default new class Transceiver {
   }
 
   setPromise(Promise) {
-    dbg('Setting promise object:', Promise);
+    dbg('Setting external promise constructor:', Promise);
     this.Promise = Promise;
     for (let channel of Object.keys(this.channels)) {
       this.channels[channel].Promise = this.Promise;
