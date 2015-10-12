@@ -7,7 +7,7 @@ export default new class Transceiver {
   constructor() {
     dbg('Initializing transceiver');
     this.channels = {};
-    this.Promise = Promise || window && window.Promise ? window.Promise : null;
+    this.Promise = Promise;
   }
 
   channel(name) {
