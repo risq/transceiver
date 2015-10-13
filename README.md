@@ -57,6 +57,18 @@ Returns a channel by its name. Channel is automatically created if it doesn't ex
 
 ---
 
+
+##### `.setPromise(Function PromiseConstructor)`
+
+Override the Promise constructor to another Promise engine. Use `setPromise(null)`
+to disable automatic promisification of callbacks.
+
+```js
+transceiver.setPromise(Bluebird);
+```
+
+---
+
 ##### `.reply(String channel, args...)`
 
 Shorthand for `transceiver.channel(name).reply(args...)`.
@@ -75,6 +87,9 @@ Shorthand for `transceiver.channel(name).request(args...)`.
 
 Defines a new request handler for the channel. If a handler is already defined for the
 given request name, it will be overwritten.
+
+If request handler does not return a Promise, it will be automatically wrapped
+into a Promise (only if a global Promise constructor is defined).
 
 ```js
 transceiver.channel('users')
@@ -103,14 +118,37 @@ transceiver.channel('users')
 
 ##### `.request(String name [, args])`
 
-Send a request to the channel. If defined, call the request handler with given arguments
-and return its result.
+Send a request to the channel. If defined, call the request handler with given
+arguments. The request handler will be automatically wrapped into a Promise if a
+global Promise constructor is defined.
 
 ```js
+transceiver.channel('users')
+  .reply('getUsername', (userId) => {
+    return 'user1';
+  });
+
+transceiver.channel('users')
+  .request('getUsername', userId)
+  .then((username) => {
+    console.log(username);
+  });
+```
+
+To prevent it and call defined handler as a regular callback,
+use `transceiver.setPromise(null)`
+
+```js
+transceiver.setPromise(null);
+
+transceiver.channel('users')
+  .reply('getUsername', (userId) => {
+    return 'user1';
+  });
+
 const username = transceiver.channel('users')
   .request('getUsername', userId);
 ```
-
 
 ##### `.request(Array requests)`
 
