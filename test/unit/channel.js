@@ -1,7 +1,6 @@
 import transceiver from '../../src/transceiver';
 
 const OriginalPromiseConstructor = transceiver.Promise;
-const FakePromiseConstructor = () => {};
 const channel = transceiver.channel('test');
 const data = {
   hello: 'world'
@@ -82,13 +81,20 @@ describe('channel', () => {
         expect(channel.request).to.have.been.calledOnce;
       });
 
-      it('should have returned a promise', () => {
-        channel.replyPromise(name, cb);
+      it('should have returned a Promise', () => {
+        channel.reply(name, cb);
         channel.request(name);
         expect(channel.request).to.have.returned(sinon.match.instanceOf(Promise));
       });
 
-      it('should have pass handler callback return value to the promise', (done) => {
+      it('should have returned a handler callback result if no Promise constructor has been defined', () => {
+        transceiver.setPromise(null);
+        channel.reply(name, cb);
+        channel.request(name);
+        expect(channel.request).to.have.returned(data);
+      });
+
+      it('should have pass handler callback return value to the Promise', (done) => {
         channel.reply(name, cb);
         channel.request(name).then((result) => {
           expect(result).to.equal(data);
@@ -379,7 +385,7 @@ describe('channel', () => {
         expect(channel.replyPromise).to.have.been.calledOnce;
       });
 
-      it('should have returned a promise (on request)', () => {
+      it('should have returned a Promise (on request)', () => {
         spy(channel, 'request');
         channel.replyPromise(name, cb);
         channel.request(name);
@@ -404,7 +410,7 @@ describe('channel', () => {
         expect(cb).to.have.always.been.calledOn(channel);
       });
 
-      it('should have thrown an error if no promise object is defined', () => {
+      it('should have thrown an error if no Promise object is defined', () => {
         expect(() => {
           transceiver.setPromise(null);
           channel.replyPromise(name, cb);
@@ -437,7 +443,7 @@ describe('channel', () => {
     });
 
     describe('.replyPromise(Object handlers [, context])', () => {
-      it('should have returned a promise on each request', () => {
+      it('should have returned a Promise on each request', () => {
         spy(channel, 'request');
         channel.replyPromise({
           req1: cb,
