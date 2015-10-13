@@ -13,35 +13,35 @@ Channel based event engine with request/reply pattern for node & browser
 
 ```js
 // app.js
-
 const usersChannel = transceiver.channel('users');
 const authChannel = transceiver.channel('auth');
+const loaderChannel = transceiver.channel('loader');
 
 authChannel.on('login', onUserLogin);
 
 function onUserLogin(userId) {
-  usersChannel.request('getUsername', userId)
+  loaderChannel.request('loadAssets')
+    .then(() => usersChannel.request('getUsername', userId))
     .then((username) => {
       console.log(`${username} just logged in !`);
     })
-    .catch((err) {
-      console.log('Error retrieving username', err);
+    .catch((err) => {
+      console.log(err);
     });
 }
 
-
 // users.js
-
 transceiver.reply('users', 'getUsername', (userId) => {
-  // Fake promise
-  return promise = new Promise((resolve, reject) => {
-    resolve(`User ${userId}`);
-  });
+  return `User #${userId}`;
 });
 
+// loader.js
+transceiver.channel('loader')
+  .replyPromise('loadAssets', (resolve, reject) => {
+    setTimeout(resolve, 1000);
+  });
 
 // auth.js
-
 transceiver.channel('auth')
   .emit('login', this.userId);
 ```
@@ -56,7 +56,6 @@ transceiver.channel('auth')
 Returns a channel by its name. Channel is automatically created if it doesn't exists.
 
 ---
-
 
 ##### `.setPromise(Function PromiseConstructor)`
 
@@ -94,13 +93,9 @@ into a Promise (only if a global Promise constructor is defined).
 ```js
 transceiver.channel('users')
   .reply('getUsername', (userId) => {
-    // Fake promise
-    return promise = new Promise((resolve, reject) => {
-      resolve(`User ${userId}`);
-    });
+    return `user #${userId}`;
   });
 ```
-
 
 ##### `.reply(Object handlers [, Object context])`
 
@@ -111,6 +106,45 @@ transceiver.channel('users')
   .reply({
     getUser: this.getUser,
     deleteUser: this.deleteUser,
+  });
+```
+
+---
+
+### `.replyPromise(String name, Function handler [, Object context])`
+
+Shorthand for replying a new Promise. Uses defined Promise engine (the global
+Promise constructor, if not overwritten by `transceiver.setPromise()`).
+
+```js
+transceiver.channel('loader')
+  .replyPromise('loadAssets', (resolve, reject) => {
+    setTimeout(resolve, 1000);
+  });
+
+// Same as
+transceiver.channel('loader')
+  .reply('loadAssets', () => {
+    return new Promise(resolve, reject) => {
+      setTimeout(resolve, 1000);
+    });
+  });
+```
+
+##### `.replyPromise(Object handlers [, Object context])`
+
+Shorthand for replying several new Promises. Uses defined Promise engine (the global
+Promise constructor, if not overwritten by `transceiver.setPromise()`).
+
+```js
+transceiver.channel('loader')
+  .replyPromise({
+    loadAssets: (resolve, reject) => {
+      setTimeout(resolve, 1000);
+    }),
+    loadSounds: (resolve, reject) => {
+      setTimeout(resolve, 2000);
+    })
   });
 ```
 
