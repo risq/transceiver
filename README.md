@@ -111,7 +111,7 @@ transceiver.channel('users')
 
 ---
 
-### `.replyPromise(String name, Function handler [, Object context])`
+##### `.replyPromise(String name, Function handler [, Object context])`
 
 Shorthand for replying a new Promise. Uses defined Promise engine (the global
 Promise constructor, if not overwritten by `transceiver.setPromise()`).
