@@ -151,13 +151,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             args[_key - 1] = arguments[_key];
           }
 
-          var res = this.requestHandlers[message].callback.apply(this.requestHandlers[message].context, args);
-          this.dbg('type ' + typeof res);
           if (this.Promise) {
-            // Promisify result
-            return this.Promise.resolve(res);
+            // Promisify callback
+            return this.Promise.resolve(this.requestHandlers[message].callback.apply(this.requestHandlers[message].context, args));
           } else {
-            return res;
+            return this.requestHandlers[message].callback.apply(this.requestHandlers[message].context, args);
           }
         }
         this.dbg('Warning: Request \'' + message + '\' has no handler');
