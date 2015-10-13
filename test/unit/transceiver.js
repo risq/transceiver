@@ -67,8 +67,11 @@ describe('transceiver', () => {
       expect(transceiver.request).to.have.been.calledOnce;
     });
 
-    it('should have returned handler callback return value', () => {
-      expect(transceiver.request).to.have.always.returned(data);
+    it('should have returned handler callback return value', (done) => {
+      channel.request(name).then((result) => {
+        expect(result).to.equal(data);
+        done();
+      });
     });
   });
 
