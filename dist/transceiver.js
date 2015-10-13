@@ -9,13 +9,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 })(this, function (debug, EventEmitter, allOff) {
   'use strict';
 
-  var channel__dbg = debug('transceiver:channel');
-
   var Channel = (function () {
     function Channel(name) {
       _classCallCheck(this, Channel);
 
-      channel__dbg('Initializing channel ' + name);
       this.name = name;
       this.requestHandlers = {};
       this.emitter = new EventEmitter();
@@ -25,9 +22,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     _createClass(Channel, [{
       key: 'reply',
       value: function reply() {
-        if (arguments[0] && typeof arguments[0] === 'object') {
+        if (typeof arguments[0] === 'object') {
           this.createMultipleHandlers.apply(this, arguments);
-        } else if (arguments[0] && typeof arguments[0] === 'string') {
+        } else if (typeof arguments[0] === 'string') {
           this.createHandler.apply(this, arguments);
         } else {
           throw new Error('Invalid message name');
@@ -38,11 +35,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       key: 'createHandler',
       value: function createHandler(message, callback, context) {
         this.dbg('Defining new handler for request \'' + message + '\'');
-        if (!callback || typeof callback !== 'function') {
+        if (typeof callback !== 'function') {
           throw new Error('Invalid or missing callback');
         }
         if (this.requestHandlers[message]) {
-          this.dbg('Request \'' + message + '\' handler will be overwritten');
+          this.dbg('Warning: Request \'' + message + '\' handler will be overwritten');
         }
         this.requestHandlers[message] = {
           callback: callback,
@@ -78,13 +75,67 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }
       }
     }, {
+      key: 'replyPromise',
+      value: function replyPromise() {
+        if (typeof this.Promise !== 'function') {
+          throw new Error('No global Promise constructor has been found. Use transceiver.setPromise(Promise) to specify one.');
+        } else if (typeof arguments[0] === 'object') {
+          this.createMultiplePromiseHandlers.apply(this, arguments);
+        } else if (typeof arguments[0] === 'string') {
+          this.createPromiseHandler.apply(this, arguments);
+        } else {
+          throw new Error('Invalid message name');
+        }
+        return this;
+      }
+    }, {
+      key: 'createPromiseHandler',
+      value: function createPromiseHandler(message, callback, context) {
+        var _this = this;
+
+        if (typeof callback !== 'function') {
+          throw new Error('Invalid or missing callback');
+        }
+        this.createHandler(message, function () {
+          return new _this.Promise(callback.bind(context || _this));
+        });
+      }
+    }, {
+      key: 'createMultiplePromiseHandlers',
+      value: function createMultiplePromiseHandlers(handlers, context) {
+        var _iteratorNormalCompletion2 = true;
+        var _didIteratorError2 = false;
+        var _iteratorError2 = undefined;
+
+        try {
+          for (var _iterator2 = Object.keys(handlers)[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+            var key = _step2.value;
+
+            this.createPromiseHandler(key, handlers[key], context);
+          }
+        } catch (err) {
+          _didIteratorError2 = true;
+          _iteratorError2 = err;
+        } finally {
+          try {
+            if (!_iteratorNormalCompletion2 && _iterator2['return']) {
+              _iterator2['return']();
+            }
+          } finally {
+            if (_didIteratorError2) {
+              throw _iteratorError2;
+            }
+          }
+        }
+      }
+    }, {
       key: 'request',
       value: function request() {
-        if (arguments[0] && Array.isArray(arguments[0])) {
+        if (Array.isArray(arguments[0])) {
           return this.requestArray.apply(this, arguments);
-        } else if (arguments[0] && typeof arguments[0] === 'object') {
+        } else if (typeof arguments[0] === 'object') {
           return this.requestProps.apply(this, arguments);
-        } else if (arguments[0] && typeof arguments[0] === 'string') {
+        } else if (typeof arguments[0] === 'string') {
           return this.callHandler.apply(this, arguments);
         } else {
           throw new Error('Invalid message name');
@@ -100,9 +151,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             args[_key - 1] = arguments[_key];
           }
 
-          return this.requestHandlers[message].callback.apply(this.requestHandlers[message].context, args);
+          var res = this.requestHandlers[message].callback.apply(this.requestHandlers[message].context, args);
+          this.dbg('type ' + typeof res);
+          if (this.Promise) {
+            // Promisify result
+            return this.Promise.resolve(res);
+          } else {
+            return res;
+          }
         }
-        this.dbg('Request \'' + message + '\' has no handler');
+        this.dbg('Warning: Request \'' + message + '\' has no handler');
       }
     }, {
       key: 'requestArray',
@@ -111,47 +169,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
           return requests.map(this.callHandler, this);
         } else if (typeof requests === 'object') {
           var res = [];
-          var _iteratorNormalCompletion2 = true;
-          var _didIteratorError2 = false;
-          var _iteratorError2 = undefined;
-
-          try {
-            for (var _iterator2 = Object.keys(requests)[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-              var message = _step2.value;
-
-              res.push(this.callHandler.apply(this, [message].concat(_toConsumableArray(requests[message]))));
-            }
-          } catch (err) {
-            _didIteratorError2 = true;
-            _iteratorError2 = err;
-          } finally {
-            try {
-              if (!_iteratorNormalCompletion2 && _iterator2['return']) {
-                _iterator2['return']();
-              }
-            } finally {
-              if (_didIteratorError2) {
-                throw _iteratorError2;
-              }
-            }
-          }
-
-          return res;
-        } else {
-          throw new Error('Invalid parameter: requests must be an array or an object of requests');
-        }
-      }
-    }, {
-      key: 'requestProps',
-      value: function requestProps(requests) {
-        var _this = this;
-
-        var res = {};
-        if (Array.isArray(requests)) {
-          requests.forEach(function (message) {
-            res[message] = _this.callHandler(message);
-          });
-        } else if (typeof requests === 'object') {
           var _iteratorNormalCompletion3 = true;
           var _didIteratorError3 = false;
           var _iteratorError3 = undefined;
@@ -160,7 +177,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             for (var _iterator3 = Object.keys(requests)[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
               var message = _step3.value;
 
-              res[message] = this.callHandler.apply(this, [message].concat(_toConsumableArray(requests[message])));
+              res.push(this.callHandler.apply(this, [message].concat(_toConsumableArray(requests[message]))));
             }
           } catch (err) {
             _didIteratorError3 = true;
@@ -173,6 +190,47 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             } finally {
               if (_didIteratorError3) {
                 throw _iteratorError3;
+              }
+            }
+          }
+
+          return res;
+        } else {
+          throw new Error('Invalid parameter: requests must be an array or an object of requests');
+        }
+      }
+    }, {
+      key: 'requestProps',
+      value: function requestProps(requests) {
+        var _this2 = this;
+
+        var res = {};
+        if (Array.isArray(requests)) {
+          requests.forEach(function (message) {
+            res[message] = _this2.callHandler(message);
+          });
+        } else if (typeof requests === 'object') {
+          var _iteratorNormalCompletion4 = true;
+          var _didIteratorError4 = false;
+          var _iteratorError4 = undefined;
+
+          try {
+            for (var _iterator4 = Object.keys(requests)[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+              var message = _step4.value;
+
+              res[message] = this.callHandler.apply(this, [message].concat(_toConsumableArray(requests[message])));
+            }
+          } catch (err) {
+            _didIteratorError4 = true;
+            _iteratorError4 = err;
+          } finally {
+            try {
+              if (!_iteratorNormalCompletion4 && _iterator4['return']) {
+                _iterator4['return']();
+              }
+            } finally {
+              if (_didIteratorError4) {
+                throw _iteratorError4;
               }
             }
           }
@@ -214,24 +272,27 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
   ;
 
-  var transceiver__dbg = debug('transceiver:main');
+  var dbg = debug('transceiver:main');
 
   var transceiver = new ((function () {
     function Transceiver() {
       _classCallCheck(this, Transceiver);
 
-      transceiver__dbg('Initializing transceiver');
+      dbg('Initializing transceiver');
       this.channels = {};
+      this.Promise = Promise;
     }
 
     _createClass(Transceiver, [{
       key: 'channel',
       value: function channel(name) {
-        if (!name || typeof name !== 'string') {
+        if (typeof name !== 'string') {
           throw new Error('Invalid or missing channel name');
         }
         if (!this.channels[name]) {
+          dbg('Initializing channel ' + name);
           this.channels[name] = new Channel(name);
+          this.channels[name].Promise = this.Promise;
         }
         return this.channels[name];
       }
@@ -256,6 +317,36 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }
 
         return (_channel2 = this.channel(channelName)).reply.apply(_channel2, args);
+      }
+    }, {
+      key: 'setPromise',
+      value: function setPromise(Promise) {
+        dbg('Setting external promise constructor:', Promise);
+        this.Promise = Promise;
+        var _iteratorNormalCompletion5 = true;
+        var _didIteratorError5 = false;
+        var _iteratorError5 = undefined;
+
+        try {
+          for (var _iterator5 = Object.keys(this.channels)[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+            var channel = _step5.value;
+
+            this.channels[channel].Promise = this.Promise;
+          }
+        } catch (err) {
+          _didIteratorError5 = true;
+          _iteratorError5 = err;
+        } finally {
+          try {
+            if (!_iteratorNormalCompletion5 && _iterator5['return']) {
+              _iterator5['return']();
+            }
+          } finally {
+            if (_didIteratorError5) {
+              throw _iteratorError5;
+            }
+          }
+        }
       }
     }]);
 

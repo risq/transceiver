@@ -27,7 +27,7 @@ export default class Channel {
       throw new Error('Invalid or missing callback');
     }
     if (this.requestHandlers[message]) {
-      this.dbg(`Request '${message}' handler will be overwritten`);
+      this.dbg(`Warning: Request '${message}' handler will be overwritten`);
     }
     this.requestHandlers[message] = {
       callback,
@@ -82,9 +82,14 @@ export default class Channel {
   callHandler(message, ...args) {
     if (this.requestHandlers[message]) {
       this.dbg(`Calling '${message}' request handler`);
-      return this.requestHandlers[message].callback.apply(this.requestHandlers[message].context, args);
+      if (this.Promise) {
+        // Promisify callback
+        return this.Promise.resolve(this.requestHandlers[message].callback.apply(this.requestHandlers[message].context, args));
+      } else {
+        return this.requestHandlers[message].callback.apply(this.requestHandlers[message].context, args);
+      }
     }
-    this.dbg(`Request '${message}' has no handler`);
+    this.dbg(`Warning: Request '${message}' has no handler`);
   }
 
   requestArray(requests) {
