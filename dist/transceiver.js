@@ -238,10 +238,33 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         return res;
       }
     }, {
+      key: 'all',
+      value: function all(requests) {
+        return this.Promise.all(this.requestArray(requests));
+      }
+    }, {
+      key: 'race',
+      value: function race(requests) {
+        return this.Promise.race(this.requestArray(requests));
+      }
+    }, {
       key: 'on',
       value: function on() {
         this.emitter.on.apply(this.emitter, arguments);
         return this;
+      }
+    }, {
+      key: 'once',
+      value: function once(name, callback) {
+        var _this3 = this;
+
+        if (!callback && this.Promise) {
+          return new this.Promise(function (resolve) {
+            return _this3.emitter.once(name, resolve);
+          });
+        } else {
+          this.emitter.once.apply(this.emitter, arguments);
+        }
       }
     }, {
       key: 'emit',

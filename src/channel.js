@@ -122,9 +122,27 @@ export default class Channel {
     return res;
   }
 
+  all(requests) {
+    return this.Promise.all(this.requestArray(requests));
+  }
+
+  race(requests) {
+    return this.Promise.race(this.requestArray(requests));
+  }
+
   on() {
     this.emitter.on.apply(this.emitter, arguments);
     return this;
+  }
+
+  once(name, callback) {
+    if (!callback && this.Promise) {
+      return new this.Promise((resolve) => {
+        return this.emitter.once(name, resolve);
+      });
+    } else {
+      this.emitter.once.apply(this.emitter, arguments);
+    }
   }
 
   emit() {
