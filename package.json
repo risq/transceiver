@@ -1,6 +1,6 @@
 {
   "name": "transceiver",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Channel based event engine with request/reply pattern for node & browser",
   "main": "dist/transceiver.js",
   "scripts": {
