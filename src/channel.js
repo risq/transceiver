@@ -16,20 +16,20 @@ export default class Channel {
     } else if (typeof arguments[0] === 'string') {
       this.createHandler(...arguments);
     } else {
-      throw new Error('Invalid message name');
+      throw new Error('Invalid request name');
     }
     return this;
   }
 
-  createHandler(message, callback, context) {
-    this.dbg(`Defining new handler for request '${message}'`);
+  createHandler(name, callback, context) {
+    this.dbg(`Defining new handler for request '${name}'`);
     if (typeof callback !== 'function') {
       throw new Error('Invalid or missing callback');
     }
-    if (this.requestHandlers[message]) {
-      this.dbg(`Warning: Request '${message}' handler will be overwritten`);
+    if (this.requestHandlers[name]) {
+      this.dbg(`Warning: Request '${name}' handler will be overwritten`);
     }
-    this.requestHandlers[message] = {
+    this.requestHandlers[name] = {
       callback,
       context: context || this
     };
@@ -44,21 +44,22 @@ export default class Channel {
   replyPromise() {
     if (typeof this.Promise !== 'function') {
       throw new Error('No global Promise constructor has been found. Use transceiver.setPromise(Promise) to specify one.');
-    } else if (typeof arguments[0] === 'object') {
+    }
+    if (typeof arguments[0] === 'object') {
       this.createMultiplePromiseHandlers(...arguments);
     } else if (typeof arguments[0] === 'string') {
       this.createPromiseHandler(...arguments);
     } else {
-      throw new Error('Invalid message name');
+      throw new Error('Invalid request name');
     }
     return this;
   }
 
-  createPromiseHandler(message, callback, context) {
+  createPromiseHandler(name, callback, context) {
     if (typeof callback !== 'function') {
       throw new Error('Invalid or missing callback');
     }
-    this.createHandler(message, () => new this.Promise(callback.bind(context || this)));
+    this.createHandler(name, () => new this.Promise(callback.bind(context || this)));
   }
 
   createMultiplePromiseHandlers(handlers, context) {
@@ -75,21 +76,21 @@ export default class Channel {
     } else if (typeof arguments[0] === 'string') {
       return this.callHandler(...arguments);
     } else {
-      throw new Error('Invalid message name');
+      throw new Error('Invalid request name');
     }
   }
 
-  callHandler(message, ...args) {
-    if (this.requestHandlers[message]) {
-      this.dbg(`Calling '${message}' request handler`);
+  callHandler(name, ...args) {
+    if (this.requestHandlers[name]) {
+      this.dbg(`Calling '${name}' request handler`);
       if (this.Promise) {
         // Promisify callback
-        return this.Promise.resolve(this.requestHandlers[message].callback.apply(this.requestHandlers[message].context, args));
+        return this.Promise.resolve(this.requestHandlers[name].callback.apply(this.requestHandlers[name].context, args));
       } else {
-        return this.requestHandlers[message].callback.apply(this.requestHandlers[message].context, args);
+        return this.requestHandlers[name].callback.apply(this.requestHandlers[name].context, args);
       }
     }
-    this.dbg(`Warning: Request '${message}' has no handler`);
+    this.dbg(`Warning: Request '${name}' has no handler`);
   }
 
   requestArray(requests) {
@@ -97,8 +98,8 @@ export default class Channel {
       return requests.map(this.callHandler, this);
     } else if (typeof requests === 'object') {
       const res = [];
-      for (let message of Object.keys(requests)) {
-        res.push(this.callHandler(message, ...requests[message]));
+      for (let name of Object.keys(requests)) {
+        res.push(this.callHandler(name, ...requests[name]));
       }
       return res;
     } else {
@@ -109,12 +110,12 @@ export default class Channel {
   requestProps(requests) {
     const res = {};
     if (Array.isArray(requests)) {
-      requests.forEach((message) => {
-        res[message] = this.callHandler(message);
+      requests.forEach((name) => {
+        res[name] = this.callHandler(name);
       });
     } else if (typeof requests === 'object') {
-      for (let message of Object.keys(requests)) {
-        res[message] = this.callHandler(message, ...requests[message]);
+      for (let name of Object.keys(requests)) {
+        res[name] = this.callHandler(name, ...requests[name]);
       }
     } else {
       throw new Error('Invalid parameter: requests must be an array or an object of requests');
@@ -123,10 +124,16 @@ export default class Channel {
   }
 
   all(requests) {
+    if (typeof this.Promise !== 'function') {
+      throw new Error('No global Promise constructor has been found. Use transceiver.setPromise(Promise) to specify one.');
+    }
     return this.Promise.all(this.requestArray(requests));
   }
 
   race(requests) {
+    if (typeof this.Promise !== 'function') {
+      throw new Error('No global Promise constructor has been found. Use transceiver.setPromise(Promise) to specify one.');
+    }
     return this.Promise.race(this.requestArray(requests));
   }
 
