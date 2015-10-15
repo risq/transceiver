@@ -134,13 +134,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       value: function request() {
         if (Array.isArray(arguments[0])) {
           return this.requestArray.apply(this, arguments);
-        } else if (typeof arguments[0] === 'object') {
-          return this.requestProps.apply(this, arguments);
-        } else if (typeof arguments[0] === 'string') {
-          return this.callHandler.apply(this, arguments);
-        } else {
-          throw new Error('Invalid request name');
         }
+        if (typeof arguments[0] === 'object') {
+          return this.requestProps.apply(this, arguments);
+        }
+        if (typeof arguments[0] === 'string') {
+          return this.callHandler.apply(this, arguments);
+        }
+        throw new Error('Invalid request name');
       }
     }, {
       key: 'callHandler',
@@ -194,9 +195,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
           }
 
           return res;
-        } else {
-          throw new Error('Invalid parameter: requests must be an array or an object of requests');
         }
+        throw new Error('Invalid parameter: requests must be an array or an object of requests');
       }
     }, {
       key: 'requestProps',
@@ -256,7 +256,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       }
     }, {
       key: 'on',
-      value: function on() {
+      value: function on(name) {
+        this.dbg('Defining new handler for event \'' + name + '\'');
         this.emitter.on.apply(this.emitter, arguments);
         return this;
       }
@@ -265,23 +266,25 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       value: function once(name, callback) {
         var _this3 = this;
 
+        this.dbg('Defining new one-time handler for event \'' + name + '\'');
         if (!callback && this.Promise) {
           return new this.Promise(function (resolve) {
             return _this3.emitter.once(name, resolve);
           });
-        } else {
-          this.emitter.once.apply(this.emitter, arguments);
         }
+        this.emitter.once.apply(this.emitter, arguments);
       }
     }, {
       key: 'emit',
-      value: function emit() {
+      value: function emit(name) {
+        this.dbg('Emitting new \'' + name + '\' event');
         this.emitter.emit.apply(this.emitter, arguments);
         return this;
       }
     }, {
       key: 'off',
-      value: function off() {
+      value: function off(name) {
+        this.dbg('Removing new handler for event \'' + name + '\'');
         this.emitter.off.apply(this.emitter, arguments);
         return this;
       }
@@ -349,7 +352,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     }, {
       key: 'setPromise',
       value: function setPromise(Promise) {
-        dbg('Setting external promise constructor:', Promise);
+        dbg('Setting external promise constructor');
         this.Promise = Promise;
         var _iteratorNormalCompletion5 = true;
         var _didIteratorError5 = false;

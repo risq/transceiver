@@ -137,12 +137,14 @@ export default class Channel {
     return this.Promise.race(this.requestArray(requests));
   }
 
-  on() {
+  on(name) {
+    this.dbg(`Defining new handler for event '${name}'`);
     this.emitter.on.apply(this.emitter, arguments);
     return this;
   }
 
   once(name, callback) {
+    this.dbg(`Defining new one-time handler for event '${name}'`);
     if (!callback && this.Promise) {
       return new this.Promise((resolve) => {
         return this.emitter.once(name, resolve);
@@ -151,12 +153,14 @@ export default class Channel {
     this.emitter.once.apply(this.emitter, arguments);
   }
 
-  emit() {
+  emit(name) {
+    this.dbg(`Emitting new '${name}' event`);
     this.emitter.emit.apply(this.emitter, arguments);
     return this;
   }
 
-  off() {
+  off(name) {
+    this.dbg(`Removing new handler for event '${name}'`);
     this.emitter.off.apply(this.emitter, arguments);
     return this;
   }
