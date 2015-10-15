@@ -69,6 +69,22 @@ Every channel also implements `EventEmitter` API which allows to use methods
 `on()`, `emit()`, `once()` and `off()`.
 
 
+## Installation
+
+Use `npm install --save transceiver` to get `transceiver`.
+
+```js
+// ES6/Babel
+import transceiver from 'transceiver';
+const authChannel = transceiver.channel('auth');
+
+// Node.js / Browserify / requirejs...
+var transceiver = require('transceiver');
+var authChannel = transceiver.channel('auth');
+```
+
+`transceiver` is written in ES6 and bundled as UMD/ES5 with [`babel/generator-babel-boilerplate`](https://github.com/babel/generator-babel-boilerplate).
+
 ## Logging
 
 `transceiver` uses [`debug`](https://www.npmjs.com/package/debug) module for
