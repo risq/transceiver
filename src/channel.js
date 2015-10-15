@@ -71,13 +71,14 @@ export default class Channel {
   request() {
     if (Array.isArray(arguments[0])) {
       return this.requestArray(...arguments);
-    } else if (typeof arguments[0] === 'object') {
-      return this.requestProps(...arguments);
-    } else if (typeof arguments[0] === 'string') {
-      return this.callHandler(...arguments);
-    } else {
-      throw new Error('Invalid request name');
     }
+    if (typeof arguments[0] === 'object') {
+      return this.requestProps(...arguments);
+    }
+    if (typeof arguments[0] === 'string') {
+      return this.callHandler(...arguments);
+    }
+    throw new Error('Invalid request name');
   }
 
   callHandler(name, ...args) {
@@ -102,9 +103,8 @@ export default class Channel {
         res.push(this.callHandler(name, ...requests[name]));
       }
       return res;
-    } else {
-      throw new Error('Invalid parameter: requests must be an array or an object of requests');
     }
+    throw new Error('Invalid parameter: requests must be an array or an object of requests');
   }
 
   requestProps(requests) {
@@ -147,9 +147,8 @@ export default class Channel {
       return new this.Promise((resolve) => {
         return this.emitter.once(name, resolve);
       });
-    } else {
-      this.emitter.once.apply(this.emitter, arguments);
     }
+    this.emitter.once.apply(this.emitter, arguments);
   }
 
   emit() {
