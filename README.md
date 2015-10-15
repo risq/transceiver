@@ -207,8 +207,8 @@ Shorthand for `.requestProps(Object requests)`.
 
 ##### `.all(Array requests|Object requests)`
 
-Returns a promise that resolves when every given requests are resolved. Pass the
-result as an array of every requests result.
+Returns a promise that resolves when every given requests are resolved. Passes
+the result as an array of every requests result.
 
 Arguments can be passed for each request by using an object of requests instead
 of a simple array of request names.
@@ -232,6 +232,16 @@ transceiver.channel('loader')
   })
   .then(() => console.log('All assets have been loaded !'));
 ```
+
+---
+
+##### `.race(Array requests|Object requests)`
+
+Returns a promise that resolves when one of the given requests is resolved.
+Passes the result of the first resolved request.
+
+Arguments can be passed for each request by using an object of requests instead
+of a simple array of request names.
 
 ---
 
@@ -262,8 +272,8 @@ import bluebird from 'bluebird';
 
 transceiver.channel('test')
   .replyPromise({
-    req1: (resolve) => setTimeout(() => resolve('req1 result'), 2000),
-    req2: (resolve) => setTimeout(() => resolve('req2 result'), 1000),
+    req1: (resolve) => setTimeout(resolve, 2000, 'req1 result'),
+    req2: (resolve) => setTimeout(resolve, 1000, 'req2 result'),
   });
 
 const promisesAsProps = transceiver.channel('test')
