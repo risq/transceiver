@@ -56,21 +56,68 @@ transceiver.channel('auth')
   .emit('login', 89898);
 ```
 
+Channels can be accessed from everywhere using `transceiver` module.
+By default, making a request (using `channel.request()`) returns a promise which
+is resolved by the specified handler (with `channel.reply()`).
+
+`transceiver` does not ship any Promise engine. It tries to use global Promise
+object if available, but Promise constructor can be also set to a custom
+library, like bluebird, or any [Promises/A+](https://promisesaplus.com/)
+implementation. (see `transceiver.setPromise()`)
+
+Promise usage can also be globally disabled. If so, methods will use
+classic callbacks to call handlers.
+
+Every channel also implements `EventEmitter` API which allows to use methods
+`on()`, `emit()`, `once()` and `off()`.
+
 
 ## API Reference
+
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+  - [transceiver](#transceiver)
+      - [`.channel(String name)`](#channelstring-name)
+      - [`.setPromise(Function PromiseConstructor)`](#setpromisefunction-promiseconstructor)
+      - [`.reply(String channel, args...)`](#replystring-channel-args)
+      - [`.request(String channel, args...)`](#requeststring-channel-args)
+  - [channel](#channel)
+      - [`.request(String name [, args])`](#requeststring-name--args)
+      - [`.request(Array requests)`](#requestarray-requests)
+      - [`.request(Object requests)`](#requestobject-requests)
+      - [`.reply(String name, Function handler [, Object context])`](#replystring-name-function-handler--object-context)
+      - [`.reply(Object handlers [, Object context])`](#replyobject-handlers--object-context)
+      - [`.replyPromise(String name, Function handler [, Object context])`](#replypromisestring-name-function-handler--object-context)
+      - [`.replyPromise(Object handlers [, Object context])`](#replypromiseobject-handlers--object-context)
+      - [`.all(Array requests|Object requests)`](#allarray-requestsobject-requests)
+      - [`.race(Array requests|Object requests)`](#racearray-requestsobject-requests)
+      - [`.requestArray(Array requests|Object requests)`](#requestarrayarray-requestsobject-requests)
+      - [`.requestProps(Array requests|Object requests)`](#requestpropsarray-requestsobject-requests)
+      - [`.emit(String event [, args])`](#emitstring-event--args)
+      - [`.on(String event, Function handler)`](#onstring-event-function-handler)
+      - [`.once(String event, Function handler)`](#oncestring-event-function-handler)
+      - [`.once(String event)`](#oncestring-event)
+      - [`.off(String event, Function handler)`](#offstring-event-function-handler)
+      - [`.reset()`](#reset)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ### transceiver
 
 ##### `.channel(String name)`
 
-Returns a channel by its name. Channel is automatically created if it doesn't exists.
+Returns a channel by its name. Channel is automatically created if it doesn't
+exists.
 
 ---
 
 ##### `.setPromise(Function PromiseConstructor)`
 
-Override the Promise constructor to another Promise engine. Use `setPromise(null)`
-to disable automatic promisification of callbacks.
+Override the Promise constructor to another Promise engine. Use
+`setPromise(null)` to disable automatic promisification of callbacks. In this
+case, methods `channel.all()`, `channel.race()` and `channel.requestPromise()`
+will be unusable.
 
 ```js
 transceiver.setPromise(Bluebird);
@@ -92,10 +139,55 @@ Shorthand for `transceiver.channel(name).request(args...)`.
 
 ### channel
 
+##### `.request(String name [, args])`
+
+Send a request to the channel. If defined, call the request handler with given
+arguments. The request handler will be automatically wrapped into a Promise if a
+global Promise constructor is defined.
+
+```js
+transceiver.channel('users')
+  .reply('getUsername', (userId) => {
+    return 'user1';
+  });
+
+transceiver.channel('users')
+  .request('getUsername', userId)
+  .then((username) => {
+    console.log(username);
+  });
+```
+
+To prevent it and call defined handler as a regular callback,
+use `transceiver.setPromise(null)`
+
+```js
+transceiver.setPromise(null);
+
+transceiver.channel('users')
+  .reply('getUsername', (userId) => {
+    return 'user1';
+  });
+
+const username = transceiver.channel('users')
+  .request('getUsername', userId);
+```
+
+##### `.request(Array requests)`
+
+Shorthand for `.requestArray(Array requests)`.
+
+
+##### `.request(Object requests)`
+
+Shorthand for `.requestProps(Object requests)`.
+
+---
+
 ##### `.reply(String name, Function handler [, Object context])`
 
-Defines a new request handler for the channel. If a handler is already defined for the
-given request name, it will be overwritten.
+Defines a new request handler for the channel. If a handler is already defined
+for the given request name, it will be overwritten.
 
 If request handler does not return a Promise, it will be automatically wrapped
 into a Promise (only if a global Promise constructor is defined).
@@ -143,8 +235,8 @@ transceiver.channel('loader')
 
 ##### `.replyPromise(Object handlers [, Object context])`
 
-Shorthand for replying several new Promises. Uses defined Promise engine (the global
-Promise constructor, if not overwritten by `transceiver.setPromise()`).
+Shorthand for replying several new Promises. Uses defined Promise engine (the
+global Promise constructor, if not overwritten by `transceiver.setPromise()`).
 
 ```js
 transceiver.channel('loader')
@@ -157,51 +249,6 @@ transceiver.channel('loader')
     })
   });
 ```
-
----
-
-##### `.request(String name [, args])`
-
-Send a request to the channel. If defined, call the request handler with given
-arguments. The request handler will be automatically wrapped into a Promise if a
-global Promise constructor is defined.
-
-```js
-transceiver.channel('users')
-  .reply('getUsername', (userId) => {
-    return 'user1';
-  });
-
-transceiver.channel('users')
-  .request('getUsername', userId)
-  .then((username) => {
-    console.log(username);
-  });
-```
-
-To prevent it and call defined handler as a regular callback,
-use `transceiver.setPromise(null)`
-
-```js
-transceiver.setPromise(null);
-
-transceiver.channel('users')
-  .reply('getUsername', (userId) => {
-    return 'user1';
-  });
-
-const username = transceiver.channel('users')
-  .request('getUsername', userId);
-```
-
-##### `.request(Array requests)`
-
-Shorthand for `.requestArray(Array requests)`.
-
-
-##### `.request(Object requests)`
-
-Shorthand for `.requestProps(Object requests)`.
 
 ---
 
@@ -265,7 +312,8 @@ of a simple array of request names.
 
 Note: If a Promise engine is used, the result will be an object of promises.
 
-Can be useful with promise libraries which implements `props()` method (like [bluebird](https://github.com/petkaantonov/bluebird/blob/master/API.md#props---promise)).
+Can be useful with promise libraries which implements `props()` method (like
+[bluebird](https://github.com/petkaantonov/bluebird/blob/master/API.md#props---promise)).
 
 ```js
 import bluebird from 'bluebird';
@@ -291,7 +339,7 @@ bluebird.props(promisesAsProps)
 
 ---
 
-##### `.emit(String event [, args])`
+##### `.emit(String event [, args])`
 
 Emit an event with given arguments to the channel.
 
