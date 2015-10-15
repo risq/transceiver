@@ -1,3 +1,18 @@
+0.3.2 / 2015-10-15
+==================
+
+  * 0.3.2
+  * Add race() docs in readme
+  * Fix all() and race() tests
+  * Add test for request overwriting
+  * Update readme, add new methods docs & update example
+  * Fix tests, add once(), race() and all() tests
+  * Improve logging
+  * Remove useless else conditions
+  * Rename 'message' parameters to 'name'
+  * Add once(), race() & all() methods
+  * Update changelog
+
 0.3.1 / 2015-10-14
 ==================
 
