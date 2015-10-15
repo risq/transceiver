@@ -14,6 +14,11 @@ const event = 'event';
 describe('channel', () => {
   beforeEach(() => {
     cb.reset();
+    channel.reset();
+  });
+
+  afterEach(() => {
+    transceiver.setPromise(OriginalPromiseConstructor);
   });
 
   describe('.on(String event, Function callback)', () => {
@@ -65,14 +70,56 @@ describe('channel', () => {
     });
   });
 
+  describe('.once()', () => {
+    beforeEach(() => {
+      spy(channel, 'once');
+    });
+
+    describe('.once(String event, Function callback)', () => {
+      it('should have been run once', () => {
+        channel.once(event, cb);
+        expect(channel.once).to.have.been.calledOnce;
+      });
+
+      it('should have called callback with given arguments', () => {
+        channel.once(event, cb);
+        channel.emit(event, data, 'value');
+        expect(cb).to.have.been.calledWithExactly(data, 'value');
+      });
+
+      it('should not have called callback more than once', () => {
+        channel.once(event, cb);
+        channel.emit(event, data, 'value');
+        channel.emit(event, data, 'value');
+        expect(cb).to.have.been.calledWithExactly(data, 'value');
+      });
+    });
+
+    describe('.once(String event)', () => {
+      it('should have been run once', () => {
+        channel.once(event);
+        expect(channel.once).to.have.been.calledOnce;
+      });
+
+      it('should have returned a Promise', () => {
+        channel.once(event);
+        expect(channel.once).to.have.returned(sinon.match.instanceOf(Promise));
+      });
+
+      it('should have called callback with given argument', (done) => {
+        channel.once(event).then((argument) => {
+          expect(argument).to.deep.equals(data);
+          done();
+        });
+        channel.emit(event, data);
+      });
+    });
+  });
+
   describe('.request()', () => {
     describe('.request(String name [, args])', () => {
       beforeEach(() => {
         spy(channel, 'request');
-      });
-
-      afterEach(() => {
-        transceiver.setPromise(OriginalPromiseConstructor);
       });
 
       it('should have been run once', () => {
@@ -158,12 +205,156 @@ describe('channel', () => {
     });
   });
 
+  describe('.all(Array requests|Object requests)', () => {
+    beforeEach(() => {
+      spy(channel, 'all');
+    });
+
+    it('should have returned an array of each request result (given as an array)', (done) => {
+      channel.reply('req1', () => {
+        return 'req1 result';
+      });
+      channel.reply('req2', () => {
+        return 'req2 result';
+      });
+      channel.reply('req3', () => {
+        return 'req3 result';
+      });
+      return channel.all(['req1', 'req2', 'req3']).then((result) => {
+        expect(result).to.deep.equal(['req1 result', 'req2 result', 'req3 result']);
+        done();
+      });
+    });
+
+    it('should have returned an array of each request result (given as an object)', (done) => {
+      channel.reply('req1', () => {
+        return 'req1 result';
+      });
+      channel.reply('req2', () => {
+        return 'req2 result';
+      });
+      channel.reply('req3', () => {
+        return 'req3 result';
+      });
+      return channel.all({
+          req1: [],
+          req2: [data],
+          req3: [data, 'value'],
+        }).then((result) => {
+          expect(result).to.deep.equal(['req1 result', 'req2 result', 'req3 result']);
+          done();
+        });
+    });
+
+    it('should have called request handlers with given arguments', () => {
+      channel.reply('req1', cb);
+      channel.all({
+        req1: [data, 'value'],
+      });
+      expect(cb).to.have.always.been.calledWithExactly(data, 'value');
+    });
+
+    it('should have thrown an error if requests list is not an array or an object', () => {
+      expect(() => {
+        channel.requestArray('req1');
+      }).to.always.throw(Error);
+    });
+
+    it('should have thrown an error if no Promise constructor has been defined', () => {
+      transceiver.setPromise(null);
+      channel.reply('req1', () => {
+        return 'req1 result';
+      });
+      channel.reply('req2', () => {
+        return 'req2 result';
+      });
+      channel.reply('req3', () => {
+        return 'req3 result';
+      });
+      return expect(() => {
+        channel.all(['req1', 'req2', 'req3']);
+      }).to.always.throw(Error);
+    });
+  });
+
+  describe('.race(Array requests|Object requests)', () => {
+    beforeEach(() => {
+      spy(channel, 'all');
+    });
+
+    it('should have returned the first request to resolve (given as an array)', (done) => {
+      channel.reply('req1', () => {
+        return new Promise((resolve) => setTimeout(() => resolve('req1 result'), 40));
+      });
+      channel.reply('req2', () => {
+        return new Promise((resolve) => setTimeout(() => resolve('req2 result'), 50));
+      });
+      channel.reply('req3', () => {
+        return new Promise((resolve) => setTimeout(() => resolve('req3 result'), 20));
+      });
+      return channel.race(['req1', 'req2', 'req3']).then((result) => {
+        expect(result).to.equal('req3 result');
+        done();
+      });
+    });
+
+    it('should have returned the first request to resolve (given as an object)', (done) => {
+      channel.reply('req1', () => {
+        return new Promise((resolve) => setTimeout(() => resolve('req1 result'), 10));
+      });
+      channel.reply('req2', () => {
+        return new Promise((resolve) => setTimeout(() => resolve('req2 result'), 20));
+      });
+      channel.reply('req3', () => {
+        return new Promise((resolve) => setTimeout(() => resolve('req3 result'), 20));
+      });
+      return channel.race({
+          req1: [],
+          req2: [data],
+          req3: [data, 'value'],
+        }).then((result) => {
+          expect(result).to.equal('req1 result');
+          done();
+        });
+    });
+
+    it('should have called request handlers with given arguments', () => {
+      channel.reply('req1', cb);
+      channel.all({
+        req1: [data, 'value'],
+      });
+      expect(cb).to.have.always.been.calledWithExactly(data, 'value');
+    });
+
+    it('should have thrown an error if requests list is not an array or an object', () => {
+      expect(() => {
+        channel.requestArray('req1');
+      }).to.always.throw(Error);
+    });
+
+    it('should have thrown an error if no Promise constructor has been defined', () => {
+      transceiver.setPromise(null);
+      channel.reply('req1', () => {
+        return 'req1 result';
+      });
+      channel.reply('req2', () => {
+        return 'req2 result';
+      });
+      channel.reply('req3', () => {
+        return 'req3 result';
+      });
+      expect(() => {
+        channel.all(['req1', 'req2', 'req3']);
+      }).to.always.throw(Error);
+    });
+  });
+
   describe('.requestArray(Array requests|Object requests)', () => {
     beforeEach(() => {
       spy(channel, 'requestArray');
     });
 
-    it('should have handled multiple requests given as an array', () => {
+    it('should have handled multiple requests given as an array', (done) => {
       channel.reply('req1', () => {
         return 'req1 result';
       });
@@ -174,13 +365,13 @@ describe('channel', () => {
         return 'req3 result';
       });
       const promisesArray = channel.requestArray(['req1', 'req2', 'req3']);
-      Promise.all(promisesArray).then((result) => {
-        expect(result).to.equal(['req1 result', 'req2 result', 'req3 result']);
+      return Promise.all(promisesArray).then((result) => {
+        expect(result).to.deep.equal(['req1 result', 'req2 result', 'req3 result']);
         done();
       });
     });
 
-    it('should have handled multiple requests given as an object', () => {
+    it('should have handled multiple requests given as an object', (done) => {
       channel.reply('req1', () => {
         return 'req1 result';
       });
@@ -195,8 +386,8 @@ describe('channel', () => {
         req2: [data],
         req3: [data, 'value'],
       });
-      Promise.all(promisesArray).then((result) => {
-        expect(result).to.equal(['req1 result', 'req2 result', 'req3 result']);
+      return Promise.all(promisesArray).then((result) => {
+        expect(result).to.deep.equal(['req1 result', 'req2 result', 'req3 result']);
         done();
       });
     });
@@ -221,7 +412,7 @@ describe('channel', () => {
       spy(channel, 'requestProps');
     });
 
-    it('should have handled multiple requests given as an array', () => {
+    it('should have handled multiple requests given as an array', (done) => {
       channel.reply('req1', () => {
         return 'req1 result';
       });
@@ -233,13 +424,13 @@ describe('channel', () => {
       });
       const result = channel.requestProps(['req1', 'req2', 'req3']);
       const promisesArray = [result.req1, result.req2, result.req3];
-      Promise.all(promisesArray).then((result) => {
-        expect(result).to.equal(['req1 result', 'req2 result', 'req3 result']);
+      return Promise.all(promisesArray).then((result) => {
+        expect(result).to.deep.equal(['req1 result', 'req2 result', 'req3 result']);
         done();
       });
     });
 
-    it('should have handled multiple requests given as an object', () => {
+    it('should have handled multiple requests given as an object', (done) => {
       channel.reply('req1', () => {
         return 'req1 result';
       });
@@ -255,8 +446,8 @@ describe('channel', () => {
         req3: [data, 'value'],
       });
       const promisesArray = [result.req1, result.req2, result.req3];
-      Promise.all(promisesArray).then((result) => {
-        expect(result).to.equal(['req1 result', 'req2 result', 'req3 result']);
+      return Promise.all(promisesArray).then((result) => {
+        expect(result).to.deep.equal(['req1 result', 'req2 result', 'req3 result']);
         done();
       });
     });
@@ -373,10 +564,6 @@ describe('channel', () => {
   describe('.replyPromise()', () => {
     beforeEach(() => {
       spy(channel, 'replyPromise');
-    });
-
-    afterEach(() => {
-      transceiver.setPromise(OriginalPromiseConstructor);
     });
 
     describe('.replyPromise(String name, Function callback [, Object context])', () => {
