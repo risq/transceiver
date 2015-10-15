@@ -497,6 +497,13 @@ describe('channel', () => {
         expect(cb).to.have.always.been.calledOn(channel);
       });
 
+      it('should have overwritten an already existing handler for the same request name', () => {
+        channel.reply(name, cb);
+        channel.reply(name, () => {});
+        channel.request(name);
+        expect(cb).to.have.not.been.called;
+      });
+
       it('should have thrown an error if name is missing', () => {
         expect(() => {
           channel.reply();
