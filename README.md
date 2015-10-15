@@ -57,19 +57,31 @@ transceiver.channel('auth')
 ```
 
 Channels can be accessed from everywhere using `transceiver` module.
-By default, making a request (using `channel.request()`) returns a promise which
-is resolved by the specified handler (with `channel.reply()`).
+By default, making a request (using `channel.request()`) on a channel returns a
+promise which is resolved by the specified handler (with `channel.reply()`),
+on the same channel.
 
 `transceiver` does not ship any Promise engine. It tries to use global Promise
 object if available, but Promise constructor can be also set to a custom
 library, like bluebird, or any [Promises/A+](https://promisesaplus.com/)
-implementation. (see `transceiver.setPromise()`)
+implementation (see `transceiver.setPromise()`).
 
 Promise usage can also be globally disabled. If so, methods will use
 classic callbacks to call handlers.
 
 Every channel also implements `EventEmitter` API which allows to use methods
 `on()`, `emit()`, `once()` and `off()`.
+
+
+## Logging
+
+`transceiver` uses [`debug`](https://www.npmjs.com/package/debug) module for
+environment agnostic logging.
+
+With node.js, use `DEBUG="transceiver:*"` environment variable to display logs.
+
+In browser, open console and type `localStorage.debug='transceiver:*'`, then
+reload the page.
 
 
 ## API Reference
