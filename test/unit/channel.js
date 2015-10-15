@@ -256,7 +256,7 @@ describe('channel', () => {
 
     it('should have thrown an error if requests list is not an array or an object', () => {
       expect(() => {
-        channel.requestArray('req1');
+        channel.all('req1');
       }).to.always.throw(Error);
     });
 
@@ -320,7 +320,7 @@ describe('channel', () => {
 
     it('should have called request handlers with given arguments', () => {
       channel.reply('req1', cb);
-      channel.all({
+      channel.race({
         req1: [data, 'value'],
       });
       expect(cb).to.have.always.been.calledWithExactly(data, 'value');
@@ -328,7 +328,7 @@ describe('channel', () => {
 
     it('should have thrown an error if requests list is not an array or an object', () => {
       expect(() => {
-        channel.requestArray('req1');
+        channel.race('req1');
       }).to.always.throw(Error);
     });
 
@@ -344,7 +344,7 @@ describe('channel', () => {
         return 'req3 result';
       });
       expect(() => {
-        channel.all(['req1', 'req2', 'req3']);
+        channel.race(['req1', 'req2', 'req3']);
       }).to.always.throw(Error);
     });
   });
