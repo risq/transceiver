@@ -27,14 +27,13 @@ auth.once('login')
 // users.js
 transceiver.channel('users')
   .reply({
-    loadUserData,
-    getUsername: (user) => {
-      return `User ${user.name}`;
-    },
+    getUser,
+    getUsername: (user) => `User ${user.name}`,
   });
 
-function loadUserData(userId) {
+function getUser(userId) {
   return new Promise((resolve, reject) => {
+    // Retrieve user from db
     // ...
     resolve({name: 'bob'});
   });
@@ -53,20 +52,22 @@ transceiver.channel('auth')
 ```
 
 Channels can be accessed from everywhere using `transceiver` module.
-By default, making a request (using `channel.request()`) on a channel returns a
-promise which is resolved by the specified handler (with `channel.reply()`),
+By default, making a request (using [`channel.request()`](#requeststring-name--args))
+on a channel returns a Promise which is resolved by the specified handler (with [`channel.reply()`](#replystring-name-function-handler--object-context)),
 on the same channel.
 
 `transceiver` does not ship any Promise engine. It tries to use global Promise
 object if available, but Promise constructor can be also set to a custom
-library, like bluebird, or any [Promises/A+](https://promisesaplus.com/)
-implementation (see `transceiver.setPromise()`).
+library, like [bluebird](https://github.com/petkaantonov/bluebird), or any
+[Promises/A+](https://promisesaplus.com/) implementation (see
+[`transceiver.setPromise()`](#setpromisefunction-promiseconstructor)).
 
 Promise usage can also be globally disabled. If so, methods will use
 classic callbacks to call handlers.
 
 Every channel also implements `EventEmitter` API which allows to use methods
-`on()`, `emit()`, `once()` and `off()`.
+[`on()`](#onstring-event-function-handler), [`emit()`](#emitstring-event--args),
+[`once()`](#oncestring-event-function-handler) and [`off()`](#offstring-event-function-handler).
 
 
 ## Installation
@@ -83,7 +84,7 @@ var transceiver = require('transceiver');
 var authChannel = transceiver.channel('auth');
 ```
 
-`transceiver` is written in ES6 and bundled as UMD/ES5 with [`babel/generator-babel-boilerplate`](https://github.com/babel/generator-babel-boilerplate).
+`transceiver` is written in ES6 and bundled as UMD/ES5 thanks to [`generator-babel-boilerplate`](https://github.com/babel/generator-babel-boilerplate).
 
 ## Logging
 
@@ -144,7 +145,11 @@ case, methods `channel.all()`, `channel.race()` and `channel.requestPromise()`
 will be unusable.
 
 ```js
+// Use a custom Promise library
 transceiver.setPromise(Bluebird);
+
+// Globally disable transceiver Promises usage
+transceiver.setPromise(null);
 ```
 
 ---
@@ -183,7 +188,7 @@ transceiver.channel('users')
 ```
 
 To prevent it and call defined handler as a regular callback,
-use `transceiver.setPromise(null)`
+use `transceiver.setPromise(null)`.
 
 ```js
 transceiver.setPromise(null);
@@ -225,7 +230,7 @@ transceiver.channel('users')
 
 ##### `.reply(Object handlers [, Object context])`
 
-Defines several request handlers in the same time.
+Defines several request handlers at the same time.
 
 ```js
 transceiver.channel('users')
@@ -297,9 +302,9 @@ transceiver.channel('loader')
 // Using an object of requests to pass arguments
 transceiver.channel('loader')
   .all({
-    loadImages: ['any', 'argument'],
+    loadImages: ['any', 'argument', 42], // Pass a list of arguments using an array as value
     loadSounds: [],
-    loadData: [true],
+    loadData: true, // A single argument can be passed directly, if it is not an array
   })
   .then(() => console.log('All assets have been loaded !'));
 ```
@@ -312,27 +317,42 @@ Returns a promise that resolves when one of the given requests is resolved.
 Passes the result of the first resolved request.
 
 Arguments can be passed for each request by using an object of requests instead
-of a simple array of request names.
+of a simple array of request names (same usage as [`channel.all()`](#allarray-requestsobject-requests)).
 
 ---
 
 ##### `.requestArray(Array requests|Object requests)`
 
-Sends several requests in the same time, and returns handlers results as an
+Sends several requests at the same time, and returns handlers results as an
 array.
+
 Arguments can be passed for each request by using an object of requests instead
-of a simple array of request names.
+of a simple array of request names (same usage as [`channel.all()`](#allarray-requestsobject-requests)).
 
 Note: If a Promise engine is used, the result will be an array of promises.
+
+```js
+const promisesArray = transceiver.channel('loader')
+  .requestArray(['loadImages', 'loadSounds', 'loadData']);
+
+Promise.all(promisesArray)
+  .then(() => console.log('All assets have been loaded !'));
+
+// Same as
+transceiver.channel('loader')
+  .all(['loadImages', 'loadSounds', 'loadData'])
+  .then(() => console.log('All assets have been loaded !'));
+```
 
 ---
 
 ##### `.requestProps(Array requests|Object requests)`
 
-Sends several requests in the same time, and returns an object where keys
+Sends several requests at the same time, and returns an object where keys
 correspond to requests names and values to their respective handlers results.
+
 Arguments can be passed for each request by using an object of requests instead
-of a simple array of request names.
+of a simple array of request names (same usage as [`channel.all()`](#allarray-requestsobject-requests)).
 
 Note: If a Promise engine is used, the result will be an object of promises.
 
@@ -340,7 +360,7 @@ Can be useful with promise libraries which implements `props()` method (like
 [bluebird](https://github.com/petkaantonov/bluebird/blob/master/API.md#props---promise)).
 
 ```js
-import bluebird from 'bluebird';
+import Bluebird from 'bluebird';
 
 transceiver.channel('test')
   .replyPromise({
@@ -354,7 +374,7 @@ const promisesAsProps = transceiver.channel('test')
   // Note: Arguments can be passed to the request handlers by using:
   // .requestProps({req1: [args], req2: [args]});
 
-bluebird.props(promisesAsProps)
+Bluebird.props(promisesAsProps)
   .then((res) => {
     console.log(res.req1);
     console.log(res.req2);
@@ -365,7 +385,7 @@ bluebird.props(promisesAsProps)
 
 ##### `.emit(String event [, args])`
 
-Emit an event with given arguments to the channel.
+Emits an event with given arguments to the channel.
 
 ```js
 transceiver.channel('auth')
@@ -376,7 +396,7 @@ transceiver.channel('auth')
 
 ##### `.on(String event, Function handler)`
 
-Add a event listener to the channel.
+Adds a event listener to the channel.
 
 ```js
 transceiver.channel('auth')
@@ -389,7 +409,7 @@ transceiver.channel('auth')
 
 ##### `.once(String event, Function handler)`
 
-Add a one-time event listener to the channel.
+Adds a one-time event listener to the channel.
 
 ```js
 transceiver.channel('auth')
@@ -401,8 +421,9 @@ transceiver.channel('auth')
 
 ##### `.once(String event)`
 
-Return a promise which resolves when the given event is emitted (only if a
-global Promise constructor is defined).
+Adds a one-time event listener to the channel. Returns a promise which resolves
+when the given event is emitted (only if a global Promise constructor is
+defined).
 
 ```js
 transceiver.channel('auth')
@@ -416,10 +437,10 @@ transceiver.channel('auth')
 
 ##### `.off(String event, Function handler)`
 
-Remove an already defined event listener to the channel.
+Removes an already defined event listener to the channel.
 
 ---
 
 ##### `.reset()`
 
-Remove all event listeners and request handlers of the channel.
+Removes all event listeners and request handlers of the channel.
