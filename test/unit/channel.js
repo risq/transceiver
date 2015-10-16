@@ -254,6 +254,14 @@ describe('channel', () => {
       expect(cb).to.have.always.been.calledWithExactly(data, 'value');
     });
 
+    it('should have called request handlers with an argument not passed as an array', () => {
+      channel.reply('req1', cb);
+      channel.all({
+        req1: data,
+      });
+      expect(cb).to.have.always.been.calledWithExactly(data);
+    });
+
     it('should have thrown an error if requests list is not an array or an object', () => {
       expect(() => {
         channel.all('req1');
@@ -324,6 +332,14 @@ describe('channel', () => {
         req1: [data, 'value'],
       });
       expect(cb).to.have.always.been.calledWithExactly(data, 'value');
+    });
+
+    it('should have called request handlers with an argument not passed as an array', () => {
+      channel.reply('req1', cb);
+      channel.race({
+        req1: data,
+      });
+      expect(cb).to.have.always.been.calledWithExactly(data);
     });
 
     it('should have thrown an error if requests list is not an array or an object', () => {
@@ -400,6 +416,14 @@ describe('channel', () => {
       expect(cb).to.have.always.been.calledWithExactly(data, 'value');
     });
 
+    it('should have called request handlers with an argument not passed as an array', () => {
+      channel.reply('req1', cb);
+      channel.requestArray({
+        req1: data,
+      });
+      expect(cb).to.have.always.been.calledWithExactly(data);
+    });
+
     it('should have thrown an error if requests list is not an array or an object', () => {
       expect(() => {
         channel.requestArray('req1');
@@ -458,6 +482,14 @@ describe('channel', () => {
         req1: [data, 'value'],
       });
       expect(cb).to.have.always.been.calledWithExactly(data, 'value');
+    });
+
+    it('should have called request handlers with an argument not passed as an array', () => {
+      channel.reply('req1', cb);
+      channel.requestProps({
+        req1: data,
+      });
+      expect(cb).to.have.always.been.calledWithExactly(data);
     });
 
     it('should have thrown an error if requests list is not an array or an object', () => {

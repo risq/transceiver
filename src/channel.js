@@ -100,7 +100,8 @@ export default class Channel {
     } else if (typeof requests === 'object') {
       const res = [];
       for (let name of Object.keys(requests)) {
-        res.push(this.callHandler(name, ...requests[name]));
+        const args = Array.isArray(requests[name]) ? requests[name] : [requests[name]];
+        res.push(this.callHandler(name, ...args));
       }
       return res;
     }
@@ -115,7 +116,8 @@ export default class Channel {
       });
     } else if (typeof requests === 'object') {
       for (let name of Object.keys(requests)) {
-        res[name] = this.callHandler(name, ...requests[name]);
+        const args = Array.isArray(requests[name]) ? requests[name] : [requests[name]];
+        res[name] = this.callHandler(name, ...args);
       }
     } else {
       throw new Error('Invalid parameter: requests must be an array or an object of requests');
