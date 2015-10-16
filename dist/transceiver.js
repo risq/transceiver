@@ -177,7 +177,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             for (var _iterator3 = Object.keys(requests)[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
               var _name = _step3.value;
 
-              res.push(this.callHandler.apply(this, [_name].concat(_toConsumableArray(requests[_name]))));
+              var args = Array.isArray(requests[_name]) ? requests[_name] : [requests[_name]];
+              res.push(this.callHandler.apply(this, [_name].concat(_toConsumableArray(args))));
             }
           } catch (err) {
             _didIteratorError3 = true;
@@ -217,7 +218,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             for (var _iterator4 = Object.keys(requests)[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
               var _name2 = _step4.value;
 
-              res[_name2] = this.callHandler.apply(this, [_name2].concat(_toConsumableArray(requests[_name2])));
+              var args = Array.isArray(requests[_name2]) ? requests[_name2] : [requests[_name2]];
+              res[_name2] = this.callHandler.apply(this, [_name2].concat(_toConsumableArray(args)));
             }
           } catch (err) {
             _didIteratorError4 = true;
