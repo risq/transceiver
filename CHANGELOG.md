@@ -1,3 +1,15 @@
+0.3.3 / 2015-10-17
+==================
+
+  * Update readme
+  * Handle single argument pass shortand for all(), race(), requestArray() and requestProps()
+  * Update package description & keywords
+  * Update changelog
+  * Add Installation docs
+  * Update readme badges
+  * Update readme, add Installation and Logging docs
+  * Update readme, add TOC
+
 0.3.2 / 2015-10-15
 ==================
 
