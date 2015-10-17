@@ -134,11 +134,25 @@ describe('channel', () => {
         expect(channel.request).to.have.returned(sinon.match.instanceOf(Promise));
       });
 
+      it('should have returned a rejected Promise if request is unhandled', (done) => {
+        return channel.request('unhandledRequest')
+          .catch((err) => {
+            done();
+          });
+      });
+
       it('should have returned a handler callback result if no Promise constructor has been defined', () => {
         transceiver.setPromise(null);
         channel.reply(name, cb);
         channel.request(name);
         expect(channel.request).to.have.returned(data);
+      });
+
+      it('should have returned an undefined value if request is not handled and no Promise constructor has been defined', () => {
+        transceiver.setPromise(null);
+        channel.reply(name, cb);
+        channel.request('unhandledRequest');
+        expect(channel.request).to.have.always.returned(undefined);
       });
 
       it('should have pass handler callback return value to the Promise', (done) => {
@@ -147,12 +161,6 @@ describe('channel', () => {
           expect(result).to.equal(data);
           done();
         });
-      });
-
-      it('should have returned an undefined value if request is not handled', () => {
-        channel.reply(name, cb);
-        channel.request('anotherMessage');
-        expect(channel.request).to.have.always.returned(undefined);
       });
 
       it('should have called handler with given arguments', () => {
