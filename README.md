@@ -86,15 +86,23 @@ var authChannel = transceiver.channel('auth');
 
 `transceiver` is written in ES6 and bundled as UMD/ES5 thanks to [`generator-babel-boilerplate`](https://github.com/babel/generator-babel-boilerplate).
 
+
 ## Logging
 
 `transceiver` uses [`debug`](https://www.npmjs.com/package/debug) module for
-environment agnostic logging.
+environment agnostic logging. Logging can be useful to debug events and requests
+calls, or to display potential warnings (e.g. in case of unhandled or
+overwritten request).
 
 With node.js, use `DEBUG="transceiver:*"` environment variable to display logs.
+Logs will be displayed in the terminal:
+
+![node.js](https://cloud.githubusercontent.com/assets/5665322/10559570/32c07272-74f4-11e5-9eb5-d1d64caf67a0.png)
 
 In browser, open console and type `localStorage.debug='transceiver:*'`, then
-reload the page.
+reload the page. Logs will be displayed in the browser console:
+
+![browser](https://cloud.githubusercontent.com/assets/5665322/10559569/32be1d56-74f4-11e5-9104-9d039d9bb296.png)
 
 
 ## API Reference
