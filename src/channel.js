@@ -92,6 +92,9 @@ export default class Channel {
       }
     }
     this.dbg(`Warning: Request '${name}' has no handler`);
+    if (this.Promise) {
+      return this.Promise.reject(new Error(`Request '${name}' has no handler`));
+    }
   }
 
   requestArray(requests) {
