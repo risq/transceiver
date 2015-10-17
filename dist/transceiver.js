@@ -161,6 +161,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
           }
         }
         this.dbg('Warning: Request \'' + name + '\' has no handler');
+        if (this.Promise) {
+          return this.Promise.reject(new Error('Request \'' + name + '\' has no handler'));
+        }
       }
     }, {
       key: 'requestArray',
@@ -330,28 +333,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         return this.channels[name];
       }
     }, {
-      key: 'request',
-      value: function request(channelName) {
-        var _channel;
-
-        for (var _len2 = arguments.length, args = Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
-          args[_key2 - 1] = arguments[_key2];
-        }
-
-        return (_channel = this.channel(channelName)).request.apply(_channel, args);
-      }
-    }, {
-      key: 'reply',
-      value: function reply(channelName) {
-        var _channel2;
-
-        for (var _len3 = arguments.length, args = Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
-          args[_key3 - 1] = arguments[_key3];
-        }
-
-        return (_channel2 = this.channel(channelName)).reply.apply(_channel2, args);
-      }
-    }, {
       key: 'setPromise',
       value: function setPromise(Promise) {
         dbg('Setting external promise constructor');
@@ -380,6 +361,132 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             }
           }
         }
+      }
+    }, {
+      key: 'request',
+      value: function request(channelName) {
+        var _channel;
+
+        for (var _len2 = arguments.length, args = Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
+          args[_key2 - 1] = arguments[_key2];
+        }
+
+        return (_channel = this.channel(channelName)).request.apply(_channel, args);
+      }
+    }, {
+      key: 'reply',
+      value: function reply(channelName) {
+        var _channel2;
+
+        for (var _len3 = arguments.length, args = Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
+          args[_key3 - 1] = arguments[_key3];
+        }
+
+        return (_channel2 = this.channel(channelName)).reply.apply(_channel2, args);
+      }
+    }, {
+      key: 'replyPromise',
+      value: function replyPromise(channelName) {
+        var _channel3;
+
+        for (var _len4 = arguments.length, args = Array(_len4 > 1 ? _len4 - 1 : 0), _key4 = 1; _key4 < _len4; _key4++) {
+          args[_key4 - 1] = arguments[_key4];
+        }
+
+        return (_channel3 = this.channel(channelName)).replyPromise.apply(_channel3, args);
+      }
+    }, {
+      key: 'all',
+      value: function all(channelName) {
+        var _channel4;
+
+        for (var _len5 = arguments.length, args = Array(_len5 > 1 ? _len5 - 1 : 0), _key5 = 1; _key5 < _len5; _key5++) {
+          args[_key5 - 1] = arguments[_key5];
+        }
+
+        return (_channel4 = this.channel(channelName)).all.apply(_channel4, args);
+      }
+    }, {
+      key: 'race',
+      value: function race(channelName) {
+        var _channel5;
+
+        for (var _len6 = arguments.length, args = Array(_len6 > 1 ? _len6 - 1 : 0), _key6 = 1; _key6 < _len6; _key6++) {
+          args[_key6 - 1] = arguments[_key6];
+        }
+
+        return (_channel5 = this.channel(channelName)).race.apply(_channel5, args);
+      }
+    }, {
+      key: 'requestArray',
+      value: function requestArray(channelName) {
+        var _channel6;
+
+        for (var _len7 = arguments.length, args = Array(_len7 > 1 ? _len7 - 1 : 0), _key7 = 1; _key7 < _len7; _key7++) {
+          args[_key7 - 1] = arguments[_key7];
+        }
+
+        return (_channel6 = this.channel(channelName)).requestArray.apply(_channel6, args);
+      }
+    }, {
+      key: 'requestProps',
+      value: function requestProps(channelName) {
+        var _channel7;
+
+        for (var _len8 = arguments.length, args = Array(_len8 > 1 ? _len8 - 1 : 0), _key8 = 1; _key8 < _len8; _key8++) {
+          args[_key8 - 1] = arguments[_key8];
+        }
+
+        return (_channel7 = this.channel(channelName)).requestProps.apply(_channel7, args);
+      }
+    }, {
+      key: 'emit',
+      value: function emit(channelName) {
+        var _channel8;
+
+        for (var _len9 = arguments.length, args = Array(_len9 > 1 ? _len9 - 1 : 0), _key9 = 1; _key9 < _len9; _key9++) {
+          args[_key9 - 1] = arguments[_key9];
+        }
+
+        return (_channel8 = this.channel(channelName)).emit.apply(_channel8, args);
+      }
+    }, {
+      key: 'on',
+      value: function on(channelName) {
+        var _channel9;
+
+        for (var _len10 = arguments.length, args = Array(_len10 > 1 ? _len10 - 1 : 0), _key10 = 1; _key10 < _len10; _key10++) {
+          args[_key10 - 1] = arguments[_key10];
+        }
+
+        return (_channel9 = this.channel(channelName)).on.apply(_channel9, args);
+      }
+    }, {
+      key: 'once',
+      value: function once(channelName) {
+        var _channel10;
+
+        for (var _len11 = arguments.length, args = Array(_len11 > 1 ? _len11 - 1 : 0), _key11 = 1; _key11 < _len11; _key11++) {
+          args[_key11 - 1] = arguments[_key11];
+        }
+
+        return (_channel10 = this.channel(channelName)).once.apply(_channel10, args);
+      }
+    }, {
+      key: 'off',
+      value: function off(channelName) {
+        var _channel11;
+
+        for (var _len12 = arguments.length, args = Array(_len12 > 1 ? _len12 - 1 : 0), _key12 = 1; _key12 < _len12; _key12++) {
+          args[_key12 - 1] = arguments[_key12];
+        }
+
+        return (_channel11 = this.channel(channelName)).off.apply(_channel11, args);
+      }
+    }, {
+      key: 'reset',
+      value: function reset(channelName) {
+        return this.channel(channelName).reset();
       }
     }]);
 
