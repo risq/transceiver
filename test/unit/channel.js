@@ -188,6 +188,9 @@ describe('channel', () => {
       });
 
       it('should have called requestArray() with given arguments', () => {
+        channel.reply('req1', () => 'req1 result');
+        channel.reply('req2', () => 'req2 result');
+        channel.reply('req3', () => 'req3 result');
         channel.request(['req1', 'req2', 'req3']);
         expect(channel.requestArray).to.have.been.calledWith(['req1', 'req2', 'req3']);
       });
@@ -199,6 +202,9 @@ describe('channel', () => {
       });
 
       it('should have called requestProps() with given arguments', () => {
+        channel.reply('req1', () => 'req1 result');
+        channel.reply('req2', () => 'req2 result');
+        channel.reply('req3', () => 'req3 result');
         channel.request({
           req1: [],
           req2: [data],
@@ -219,15 +225,9 @@ describe('channel', () => {
     });
 
     it('should have returned an array of each request result (given as an array)', (done) => {
-      channel.reply('req1', () => {
-        return 'req1 result';
-      });
-      channel.reply('req2', () => {
-        return 'req2 result';
-      });
-      channel.reply('req3', () => {
-        return 'req3 result';
-      });
+      channel.reply('req1', () => 'req1 result');
+      channel.reply('req2', () => 'req2 result');
+      channel.reply('req3', () => 'req3 result');
       return channel.all(['req1', 'req2', 'req3']).then((result) => {
         expect(result).to.deep.equal(['req1 result', 'req2 result', 'req3 result']);
         done();
@@ -235,15 +235,9 @@ describe('channel', () => {
     });
 
     it('should have returned an array of each request result (given as an object)', (done) => {
-      channel.reply('req1', () => {
-        return 'req1 result';
-      });
-      channel.reply('req2', () => {
-        return 'req2 result';
-      });
-      channel.reply('req3', () => {
-        return 'req3 result';
-      });
+      channel.reply('req1', () => 'req1 result');
+      channel.reply('req2', () => 'req2 result');
+      channel.reply('req3', () => 'req3 result');
       return channel.all({
           req1: [],
           req2: [data],
@@ -278,15 +272,9 @@ describe('channel', () => {
 
     it('should have thrown an error if no Promise constructor has been defined', () => {
       transceiver.setPromise(null);
-      channel.reply('req1', () => {
-        return 'req1 result';
-      });
-      channel.reply('req2', () => {
-        return 'req2 result';
-      });
-      channel.reply('req3', () => {
-        return 'req3 result';
-      });
+      channel.reply('req1', () => 'req1 result');
+      channel.reply('req2', () => 'req2 result');
+      channel.reply('req3', () => 'req3 result');
       return expect(() => {
         channel.all(['req1', 'req2', 'req3']);
       }).to.always.throw(Error);
@@ -299,15 +287,9 @@ describe('channel', () => {
     });
 
     it('should have returned the first request to resolve (given as an array)', (done) => {
-      channel.reply('req1', () => {
-        return new Promise((resolve) => setTimeout(() => resolve('req1 result'), 40));
-      });
-      channel.reply('req2', () => {
-        return new Promise((resolve) => setTimeout(() => resolve('req2 result'), 50));
-      });
-      channel.reply('req3', () => {
-        return new Promise((resolve) => setTimeout(() => resolve('req3 result'), 20));
-      });
+      channel.replyPromise('req1', (resolve) => setTimeout(resolve, 40, 'req1 result'));
+      channel.replyPromise('req2', (resolve) => setTimeout(resolve, 50, 'req2 result'));
+      channel.replyPromise('req3', (resolve) => setTimeout(resolve, 20, 'req3 result'));
       return channel.race(['req1', 'req2', 'req3']).then((result) => {
         expect(result).to.equal('req3 result');
         done();
@@ -315,15 +297,9 @@ describe('channel', () => {
     });
 
     it('should have returned the first request to resolve (given as an object)', (done) => {
-      channel.reply('req1', () => {
-        return new Promise((resolve) => setTimeout(() => resolve('req1 result'), 10));
-      });
-      channel.reply('req2', () => {
-        return new Promise((resolve) => setTimeout(() => resolve('req2 result'), 20));
-      });
-      channel.reply('req3', () => {
-        return new Promise((resolve) => setTimeout(() => resolve('req3 result'), 20));
-      });
+      channel.replyPromise('req1', (resolve) => setTimeout(resolve, 10, 'req1 result'));
+      channel.replyPromise('req2', (resolve) => setTimeout(resolve, 20, 'req2 result'));
+      channel.replyPromise('req3', (resolve) => setTimeout(resolve, 20, 'req3 result'));
       return channel.race({
           req1: [],
           req2: [data],
@@ -358,15 +334,9 @@ describe('channel', () => {
 
     it('should have thrown an error if no Promise constructor has been defined', () => {
       transceiver.setPromise(null);
-      channel.reply('req1', () => {
-        return 'req1 result';
-      });
-      channel.reply('req2', () => {
-        return 'req2 result';
-      });
-      channel.reply('req3', () => {
-        return 'req3 result';
-      });
+      channel.reply('req1', () => 'req1 result');
+      channel.reply('req2', () => 'req2 result');
+      channel.reply('req3', () => 'req3 result');
       expect(() => {
         channel.race(['req1', 'req2', 'req3']);
       }).to.always.throw(Error);
@@ -379,15 +349,9 @@ describe('channel', () => {
     });
 
     it('should have handled multiple requests given as an array', (done) => {
-      channel.reply('req1', () => {
-        return 'req1 result';
-      });
-      channel.reply('req2', () => {
-        return 'req2 result';
-      });
-      channel.reply('req3', () => {
-        return 'req3 result';
-      });
+      channel.reply('req1', () => 'req1 result');
+      channel.reply('req2', () => 'req2 result');
+      channel.reply('req3', () => 'req3 result');
       const promisesArray = channel.requestArray(['req1', 'req2', 'req3']);
       return Promise.all(promisesArray).then((result) => {
         expect(result).to.deep.equal(['req1 result', 'req2 result', 'req3 result']);
@@ -396,15 +360,9 @@ describe('channel', () => {
     });
 
     it('should have handled multiple requests given as an object', (done) => {
-      channel.reply('req1', () => {
-        return 'req1 result';
-      });
-      channel.reply('req2', () => {
-        return 'req2 result';
-      });
-      channel.reply('req3', () => {
-        return 'req3 result';
-      });
+      channel.reply('req1', () => 'req1 result');
+      channel.reply('req2', () => 'req2 result');
+      channel.reply('req3', () => 'req3 result');
       const promisesArray = channel.requestArray({
         req1: [],
         req2: [data],
@@ -445,15 +403,9 @@ describe('channel', () => {
     });
 
     it('should have handled multiple requests given as an array', (done) => {
-      channel.reply('req1', () => {
-        return 'req1 result';
-      });
-      channel.reply('req2', () => {
-        return 'req2 result';
-      });
-      channel.reply('req3', () => {
-        return 'req3 result';
-      });
+      channel.reply('req1', () => 'req1 result');
+      channel.reply('req2', () => 'req2 result');
+      channel.reply('req3', () => 'req3 result');
       const result = channel.requestProps(['req1', 'req2', 'req3']);
       const promisesArray = [result.req1, result.req2, result.req3];
       return Promise.all(promisesArray).then((result) => {
@@ -463,15 +415,9 @@ describe('channel', () => {
     });
 
     it('should have handled multiple requests given as an object', (done) => {
-      channel.reply('req1', () => {
-        return 'req1 result';
-      });
-      channel.reply('req2', () => {
-        return 'req2 result';
-      });
-      channel.reply('req3', () => {
-        return 'req3 result';
-      });
+      channel.reply('req1', () => 'req1 result');
+      channel.reply('req2', () => 'req2 result');
+      channel.reply('req3', () => 'req3 result');
       const result = channel.requestProps({
         req1: [],
         req2: [data],
@@ -748,7 +694,8 @@ describe('channel', () => {
     it('should have prevent reply() callback to be called on request()', () => {
       channel.reply(name, cb);
       channel.reset();
-      channel.request(name);
+      channel.request(name)
+        .catch(() => {});
       expect(cb).to.have.not.been.called;
     });
   });
