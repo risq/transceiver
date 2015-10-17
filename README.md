@@ -163,8 +163,7 @@ will be unusable in this mode.
   - [transceiver](#transceiver)
       - [`.channel(String name)`](#channelstring-name)
       - [`.setPromise(Function PromiseConstructor)`](#setpromisefunction-promiseconstructor)
-      - [`.reply(String channel, args...)`](#replystring-channel-args)
-      - [`.request(String channel, args...)`](#requeststring-channel-args)
+      - [Shorthands](#shorthands)
   - [channel](#channel)
       - [`.request(String name [, args])`](#requeststring-name--args)
       - [`.request(Array requests)`](#requestarray-requests)
@@ -211,15 +210,15 @@ transceiver.setPromise(null);
 
 ---
 
-##### `.reply(String channel, args...)`
+##### Shorthands
 
-Shorthand for `transceiver.channel(name).reply(args...)`.
+Every method from a channel can be accessed directly via `transceiver` using
+`transceiver.methodName(channelName, ...args)` :
 
----
-
-##### `.request(String channel, args...)`
-
-Shorthand for `transceiver.channel(name).request(args...)`.
+```js
+transceiver.emit('auth', 'login');
+transceiver.reply('users', 'getUsername', user => `User ${user.name}`);
+```
 
 ---
 
