@@ -46,35 +46,6 @@ describe('transceiver', () => {
     });
   });
 
-  describe('.reply(String channel [, args])', () => {
-    beforeEach(() => {
-      spy(transceiver, 'reply');
-    });
-
-    it('should have been run once', () => {
-      transceiver.reply('test', name, cb);
-      expect(transceiver.reply).to.have.been.calledOnce;
-    });
-  });
-
-  describe('.request(String channel [, args])', () => {
-    beforeEach(() => {
-      spy(transceiver, 'request');
-      transceiver.request('test', name);
-    });
-
-    it('should have been run once', () => {
-      expect(transceiver.request).to.have.been.calledOnce;
-    });
-
-    it('should have returned handler callback return value', (done) => {
-      channel.request(name).then((result) => {
-        expect(result).to.equal(data);
-        done();
-      });
-    });
-  });
-
   describe('.setPromise(Promise promise)', () => {
     beforeEach(() => {
       spy(transceiver, 'setPromise');
@@ -94,5 +65,105 @@ describe('transceiver', () => {
       transceiver.setPromise(FakePromiseConstructor);
       expect(transceiver.channel(name).Promise).to.equals(FakePromiseConstructor);
     });
+  });
+
+  describe('Shorthands', () => {
+    describe('.request(String channelName, ...args)', () => {
+      it('should have called channel.request(...args) with given arguments', () => {
+        spy(channel, 'request');
+        transceiver.reply('test', name, cb);
+        transceiver.request('test', name);
+        expect(channel.request).to.have.been.calledWithExactly(name);
+      });
+    });
+
+    describe('.reply(String channelName, ...args)', () => {
+      it('should have called channel.reply(...args) with given arguments', () => {
+        spy(channel, 'reply');
+        transceiver.reply('test', name, cb);
+        expect(channel.reply).to.have.been.calledWithExactly(name, cb);
+      });
+    });
+
+    describe('.replyPromise(String channelName, ...args)', () => {
+      it('should have called channel.replyPromise(...args) with given arguments', () => {
+        spy(channel, 'replyPromise');
+        transceiver.replyPromise('test', name, cb);
+        expect(channel.replyPromise).to.have.been.calledWithExactly(name, cb);
+      });
+    });
+
+    describe('.all(String channelName, ...args)', () => {
+      it('should have called channel.all(...args) with given arguments', () => {
+        spy(channel, 'all');
+        transceiver.all('test', []);
+        expect(channel.all).to.have.been.calledWithExactly([]);
+      });
+    });
+
+    describe('.race(String channelName, ...args)', () => {
+      it('should have called channel.race(...args) with given arguments', () => {
+        spy(channel, 'race');
+        transceiver.race('test', []);
+        expect(channel.race).to.have.been.calledWithExactly([]);
+      });
+    });
+
+    describe('.requestArray(String channelName, ...args)', () => {
+      it('should have called channel.requestArray(...args) with given arguments', () => {
+        spy(channel, 'requestArray');
+        transceiver.requestArray('test', []);
+        expect(channel.requestArray).to.have.been.calledWithExactly([]);
+      });
+    });
+
+    describe('.requestProps(String channelName, ...args)', () => {
+      it('should have called channel.requestProps(...args) with given arguments', () => {
+        spy(channel, 'requestProps');
+        transceiver.requestProps('test', []);
+        expect(channel.requestProps).to.have.been.calledWithExactly([]);
+      });
+    });
+
+    describe('.emit(String channelName, ...args)', () => {
+      it('should have called channel.emit(...args) with given arguments', () => {
+        spy(channel, 'emit');
+        transceiver.emit('test', event);
+        expect(channel.emit).to.have.been.calledWithExactly(event);
+      });
+    });
+
+    describe('.on(String channelName, ...args)', () => {
+      it('should have called channel.on(...args) with given arguments', () => {
+        spy(channel, 'on');
+        transceiver.on('test', event, cb);
+        expect(channel.on).to.have.been.calledWithExactly(event, cb);
+      });
+    });
+
+    describe('.once(String channelName, ...args)', () => {
+      it('should have called channel.once(...args) with given arguments', () => {
+        spy(channel, 'once');
+        transceiver.once('test', event, cb);
+        expect(channel.once).to.have.been.calledWithExactly(event, cb);
+      });
+    });
+
+    describe('.off(String channelName, ...args)', () => {
+      it('should have called channel.off(...args) with given arguments', () => {
+        spy(channel, 'off');
+        transceiver.off('test', event, cb);
+        expect(channel.off).to.have.been.calledWithExactly(event, cb);
+      });
+    });
+
+    describe('.reset(String channelName, ...args)', () => {
+      it('should have called channel.reset(...args) with given arguments', () => {
+        spy(channel, 'reset');
+        transceiver.reset('test');
+        expect(channel.reset).to.have.been.calledWithExactly();
+      });
+    });
+
   });
 });
