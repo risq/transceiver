@@ -74,7 +74,7 @@ export default new class Transceiver {
     return this.channel(channelName).off(...args);
   }
 
-  reset(channelName, ...args) {
-    return this.channel(channelName).reset(...args);
+  reset(channelName) {
+    return this.channel(channelName).reset();
   }
 };

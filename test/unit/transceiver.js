@@ -157,11 +157,11 @@ describe('transceiver', () => {
       });
     });
 
-    describe('.reset(String channelName, ...args)', () => {
-      it('should have called channel.reset(...args) with given arguments', () => {
+    describe('.reset(String channelName)', () => {
+      it('should have called channel.reset()', () => {
         spy(channel, 'reset');
         transceiver.reset('test');
-        expect(channel.reset).to.have.been.calledWithExactly();
+        expect(channel.reset).to.have.been.called;
       });
     });
 
