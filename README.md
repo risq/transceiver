@@ -14,7 +14,7 @@ const auth = transceiver.channel('auth');
 const loader = transceiver.channel('loader');
 
 auth.once('login')
-  .then(userId => users.request('loadUserData', userId))
+  .then(userId => users.request('getUser', userId))
   .then(user => users.request('getUsername', user))
   .then(username => console.log(`${username} just logged in !`))
   .then(() => loader.all([
