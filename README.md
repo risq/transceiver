@@ -2,6 +2,12 @@
 
 Channel based event bus with request/reply pattern, using promises. For node & browser.
 
+ - [Usage](#usage)
+ - [Installation](#installation)
+ - [Logging](#logging)
+ - [Using without Promises](#using-without-promises)
+ - [API Reference](#api-reference)
+
 [![NPM](https://nodei.co/npm/transceiver.png?compact=true)](https://nodei.co/npm/transceiver/)
 
 
@@ -28,7 +34,7 @@ auth.once('login')
 transceiver.channel('users')
   .reply({
     getUser,
-    getUsername: (user) => `User ${user.name}`,
+    getUsername: user => `User ${user.name}`,
   });
 
 function getUser(userId) {
@@ -48,7 +54,7 @@ transceiver.channel('loader')
 
 // auth.js
 transceiver.channel('auth')
-  .emit('login', 89898);
+  .emit('login', 42);
 ```
 
 Channels can be accessed from everywhere using `transceiver` module.
@@ -91,18 +97,62 @@ var authChannel = transceiver.channel('auth');
 
 `transceiver` uses [`debug`](https://www.npmjs.com/package/debug) module for
 environment agnostic logging. Logging can be useful to debug events and requests
-calls, or to display potential warnings (e.g. in case of unhandled or
+calls, and to display potential warnings (e.g. in case of unhandled or
 overwritten request).
 
 With node.js, use `DEBUG="transceiver:*"` environment variable to display logs.
-Logs will be displayed in the terminal:
+Logs will be displayed in the terminal :
 
 ![node.js](https://cloud.githubusercontent.com/assets/5665322/10559570/32c07272-74f4-11e5-9eb5-d1d64caf67a0.png)
 
 In browser, open console and type `localStorage.debug='transceiver:*'`, then
-reload the page. Logs will be displayed in the browser console:
+reload the page. Logs will be displayed in the browser console :
 
 ![browser](https://cloud.githubusercontent.com/assets/5665322/10559569/32be1d56-74f4-11e5-9104-9d039d9bb296.png)
+
+
+## Using without Promises
+
+If no global Promise object is defined when `transceiver` initialize, it will
+switch to regular callback mode.
+
+Regular callback mode can also be forced at any time with the following
+command :
+
+```js
+transceiver.setPromise(null);
+```
+
+In this mode, requests will return handler function result instead of a Promise
+object :
+
+```js
+transceiver.channel('users')
+  .reply('getUsername', user => `User ${user.name}`);
+
+const username = transceiver.channel('users')
+  .request('getUsername', myUser);
+```
+
+Async requests can be handled using callbacks :
+
+```js
+transceiver.channel('users')
+  .reply('getUser', (userId, done) => {
+    // Retrieve user from db
+    // ...
+    done({name: 'bob'});
+  });
+
+const username = transceiver.channel('users')
+  .request('getUser', 42, (user) => {
+    console.log(user);
+  });
+
+```
+
+Promise related methods `channel.all()`, `channel.race()` and `channel.requestPromise()`
+will be unusable in this mode.
 
 
 ## API Reference
@@ -148,9 +198,8 @@ exists.
 ##### `.setPromise(Function PromiseConstructor)`
 
 Override the Promise constructor to another Promise engine. Use
-`setPromise(null)` to disable automatic promisification of callbacks. In this
-case, methods `channel.all()`, `channel.race()` and `channel.requestPromise()`
-will be unusable.
+`setPromise(null)` to disable automatic promisification of callbacks. See
+[Using without Promise](#using-without-promises) section for more information.
 
 ```js
 // Use a custom Promise library
@@ -184,8 +233,8 @@ global Promise constructor is defined.
 
 ```js
 transceiver.channel('users')
-  .reply('getUsername', (userId) => {
-    return 'user1';
+  .reply('getUsername', userId => {
+    return `user #${userId}`;
   });
 
 transceiver.channel('users')
@@ -202,8 +251,8 @@ use `transceiver.setPromise(null)`.
 transceiver.setPromise(null);
 
 transceiver.channel('users')
-  .reply('getUsername', (userId) => {
-    return 'user1';
+  .reply('getUsername', userId => {
+    return `user #${userId}`;
   });
 
 const username = transceiver.channel('users')
@@ -231,7 +280,7 @@ into a Promise (only if a global Promise constructor is defined).
 
 ```js
 transceiver.channel('users')
-  .reply('getUsername', (userId) => {
+  .reply('getUsername', userId => {
     return `user #${userId}`;
   });
 ```
@@ -408,7 +457,7 @@ Adds a event listener to the channel.
 
 ```js
 transceiver.channel('auth')
-  .on('login', (userId) => {
+  .on('login', userId => {
     console.log(`User ${userId} just logged in.`);
   });
 ```
@@ -421,7 +470,7 @@ Adds a one-time event listener to the channel.
 
 ```js
 transceiver.channel('auth')
-  .once('login', (userId) => {
+  .once('login', userId => {
     console.log(`User ${userId} just logged in.`);
   });
 ```
@@ -436,7 +485,7 @@ defined).
 ```js
 transceiver.channel('auth')
   .once('login')
-  .then((userId) => {
+  .then(userId => {
     console.log(`User ${userId} just logged in.`);
   });
 ```
