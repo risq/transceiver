@@ -1,6 +1,22 @@
+0.3.4 / 2015-10-18
+==================
+
+  * Fix transceiver.reset() shorthand
+  * Update readme API reference for shorthands
+  * Add shorthands tests
+  * Add all shorthands methods to transceiver class
+  * Update readme, add Using without Promises section
+  * Update Logging section in readme, add screenshots
+  * Fix typo in readme example
+  * Cleanup tests
+  * Update tests for fixed unhandled request exception
+  * Return a rejected promise on unhandled request call
+  * Update changelog
+
 0.3.3 / 2015-10-17
 ==================
 
+  * 0.3.3
   * Update readme
   * Handle single argument pass shortand for all(), race(), requestArray() and requestProps()
   * Update package description & keywords
