@@ -3,7 +3,7 @@ import Channel from './channel';
 
 const dbg = debug('transceiver:main');
 
-export default new class Transceiver {
+class Transceiver {
   constructor() {
     dbg('Initializing transceiver');
     this.channels = {};
@@ -78,3 +78,43 @@ export default new class Transceiver {
     return this.channel(channelName).reset();
   }
 };
+
+const transceiver = new Transceiver();
+
+export function reply(requestName, channelName) {
+  return function(target, handlerName, descriptor) {
+    if (!requestName && !handlerName) {
+      throw new Error('A request name has to be specified');
+    }
+
+    if (typeof target.handlers !== 'object') {
+      target.handlers = {
+        requests: [],
+        events: [],
+      };
+    }
+
+    target.handlers.requests.push({
+      channelName,
+      requestName: requestName || handlerName,
+      handler: descriptor.value,
+    });
+    return descriptor;
+  };
+};
+
+export function channel(channelName) {
+  return function decorator(target) {
+    dbg(`Applying channel decorator to channel ${channelName}`);
+    target.prototype.handlers.requests.forEach((request) => {
+      const requestChannelName = request.channelName || channelName;
+      if (!requestChannelName) {
+        throw new Error('A channel name has to be provided');
+      }
+
+      transceiver.reply(requestChannelName, request.requestName, request.handler);
+    });
+  };
+};
+
+export default transceiver;
