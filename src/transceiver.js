@@ -11,7 +11,7 @@ export default new class Transceiver {
   }
 
   channel(name) {
-    if (typeof(name) !== 'string') {
+    if (typeof name !== 'string') {
       throw new Error('Invalid or missing channel name');
     }
     if (!this.channels[name]) {
