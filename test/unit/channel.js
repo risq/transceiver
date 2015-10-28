@@ -110,7 +110,7 @@ describe('channel', () => {
         channel.once(event).then((argument) => {
           expect(argument).to.deep.equals(data);
           done();
-        });
+        }).catch(done);
         channel.emit(event, data);
       });
     });
@@ -136,9 +136,11 @@ describe('channel', () => {
 
       it('should have returned a rejected Promise if request is unhandled', (done) => {
         return channel.request('unhandledRequest')
-          .catch((err) => {
+          .catch(cb)
+          .then(() => {
+            expect(cb).to.have.been.calledWith(sinon.match.instanceOf(Error));
             done();
-          });
+          }).catch(done);
       });
 
       it('should have returned a handler callback result if no Promise constructor has been defined', () => {
@@ -160,7 +162,7 @@ describe('channel', () => {
         channel.request(name).then((result) => {
           expect(result).to.equal(data);
           done();
-        });
+        }).catch(done);
       });
 
       it('should have called handler with given arguments', () => {
@@ -231,7 +233,7 @@ describe('channel', () => {
       return channel.all(['req1', 'req2', 'req3']).then((result) => {
         expect(result).to.deep.equal(['req1 result', 'req2 result', 'req3 result']);
         done();
-      });
+      }).catch(done);
     });
 
     it('should have returned an array of each request result (given as an object)', (done) => {
@@ -245,7 +247,7 @@ describe('channel', () => {
         }).then((result) => {
           expect(result).to.deep.equal(['req1 result', 'req2 result', 'req3 result']);
           done();
-        });
+        }).catch(done);
     });
 
     it('should have called request handlers with given arguments', () => {
@@ -293,7 +295,7 @@ describe('channel', () => {
       return channel.race(['req1', 'req2', 'req3']).then((result) => {
         expect(result).to.equal('req3 result');
         done();
-      });
+      }).catch(done);
     });
 
     it('should have returned the first request to resolve (given as an object)', (done) => {
@@ -307,7 +309,7 @@ describe('channel', () => {
         }).then((result) => {
           expect(result).to.equal('req1 result');
           done();
-        });
+        }).catch(done);
     });
 
     it('should have called request handlers with given arguments', () => {
@@ -356,7 +358,7 @@ describe('channel', () => {
       return Promise.all(promisesArray).then((result) => {
         expect(result).to.deep.equal(['req1 result', 'req2 result', 'req3 result']);
         done();
-      });
+      }).catch(done);
     });
 
     it('should have handled multiple requests given as an object', (done) => {
@@ -371,7 +373,7 @@ describe('channel', () => {
       return Promise.all(promisesArray).then((result) => {
         expect(result).to.deep.equal(['req1 result', 'req2 result', 'req3 result']);
         done();
-      });
+      }).catch(done);
     });
 
     it('should have called request handlers with given arguments', () => {
@@ -411,7 +413,7 @@ describe('channel', () => {
       return Promise.all(promisesArray).then((result) => {
         expect(result).to.deep.equal(['req1 result', 'req2 result', 'req3 result']);
         done();
-      });
+      }).catch(done);
     });
 
     it('should have handled multiple requests given as an object', (done) => {
@@ -427,7 +429,7 @@ describe('channel', () => {
       return Promise.all(promisesArray).then((result) => {
         expect(result).to.deep.equal(['req1 result', 'req2 result', 'req3 result']);
         done();
-      });
+      }).catch(done);
     });
 
     it('should have called request handlers with given arguments', () => {
